@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,7 +11,8 @@ model User {
   id               Int       @id @default(autoincrement())
   firstName        String    @map("first_name") @db.VarChar(255)
   lastName         String    @map("last_name") @db.VarChar(255)
-  avatar           String    @map("avatar") @db.VarChar(255)
+  avatarId         Int?      @map("avatar_id")
+  avatar           File?     @relation(fields: [avatarId], references: [id])
   password         String    @map("password") @db.VarChar(255)
   resetToken       String?   @map("reset_token") @db.VarChar(255)
   resetTokenExpiry DateTime? @map("reset_token_expiry")
@@ -70,6 +71,42 @@ model User {
   blog                                Blog[]
   comment                             Comment[]
   subscription                        Subscription[]
+
+  @@map("users")
+}
+
+model File {
+  id           Int      @id @default(autoincrement())
+  originalName String   @map("original_name")
+  mimeType     String
+  fileSize     Int
+  width        Int
+  height       Int
+  hash         String   @unique
+  url          String
+  path         String
+  extension    String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  uploadedBy   Int?
+  user         User[]
+
+  @@index([originalName], name: "idx_file_original_name")
+  @@index([hash], name: "idx_file_hash")
+  @@map("files")
+}
+
+model FileUsage {
+  id        Int      @id @default(autoincrement())
+  fileId    Int
+  model     String
+  modelId   Int      @map("model_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([fileId], name: "idx_file_usage_file_id")
+  @@index([modelId], name: "idx_file_usage_model_id")
+  @@map("file_usage")
 }
 
 model Role {
@@ -79,7 +116,7 @@ model Role {
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   rolePermission RolePermission[]
-  User           User[]
+  user           User[]
 
   @@map("roles")
 }
@@ -87,7 +124,8 @@ model Role {
 model Permission {
   id             Int              @id @default(autoincrement())
   name           String           @db.VarChar(255)
-  slug           String           @unique() @db.VarChar(255)
+  permissioin    String           @db.VarChar(255)
+  model          String           @db.VarChar(255)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   RolePermission RolePermission[]
@@ -154,6 +192,8 @@ model Profile {
   wellnessInterests                   WellnessInterest[]
   socialCircles                       SocialCircle[]
   luxuryAlignment                     LuxuryAlignment[]
+
+  @@map("profiles")
 }
 
 model LuxuryAlignment {
@@ -427,7 +467,7 @@ model AgePreference {
   Profile   Profile? @relation(fields: [profileId], references: [id])
   profileId Int?
 
-  @@map("profiles")
+  @@map("age_preferences")
 }
 
 model PhysicalAttribute {
