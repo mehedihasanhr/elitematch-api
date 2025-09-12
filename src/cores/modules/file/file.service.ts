@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import { extname, join } from 'path';
 import sharp from 'sharp';
-import { PrismaService } from 'src/cores//services/prisma.service';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 
 @Injectable()
 export class FileService {

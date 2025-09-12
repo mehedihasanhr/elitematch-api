@@ -15,7 +15,7 @@ export class PrismaService
 
   async onModuleInit() {
     this.logger.debug('Connecting to the database...');
-    await this.$connect();
+    await this.$connect().then(() => this.logger.debug('Database connected'));
   }
 
   async onModuleDestroy() {

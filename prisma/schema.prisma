@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id               Int       @id @default(autoincrement())
+  email            String    @unique @db.VarChar(255)
   firstName        String    @map("first_name") @db.VarChar(255)
   lastName         String    @map("last_name") @db.VarChar(255)
   avatarId         Int?      @map("avatar_id")
@@ -18,8 +19,8 @@ model User {
   resetTokenExpiry DateTime? @map("reset_token_expiry")
   stripeCustomerId String?   @map("stripe_customer_id") @db.VarChar(255)
   isVerified       Boolean   @default(false) @map("is_verified")
-  roleId           Int       @map("role_id")
-  role             Role      @relation(fields: [roleId], references: [id])
+  roleId           Int?      @map("role_id")
+  role             Role?     @relation(fields: [roleId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -71,6 +72,7 @@ model User {
   blog                                Blog[]
   comment                             Comment[]
   subscription                        Subscription[]
+  profile                             Profile?
 
   @@map("users")
 }
@@ -149,6 +151,8 @@ model RolePermission {
 
 model Profile {
   id                                  Int                           @id @default(autoincrement())
+  userId                              Int                           @unique() @map("user_id")
+  user                                User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   avatar                              String                        @db.VarChar(255)
   introductionVideoLink               String                        @map("introduction_video_link") @db.VarChar(255)
   occupation                          String                        @db.VarChar(255)
