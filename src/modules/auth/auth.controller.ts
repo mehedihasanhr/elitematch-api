@@ -1,212 +1,205 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
   Get,
-  Req,
-  UseGuards,
-  Body,
+  Patch,
   Post,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
+import { Auth } from './auth.decorator';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdatePasswordDto } from './dto/password-update.dto';
 import { RegisterDto } from './dto/register.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { Request, Response } from 'express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-} from '@nestjs/swagger';
-import {
-  LoginResponseDto,
-  RegisterResponseDto,
-  ForgotPasswordResponseDto,
-  ResetPasswordResponseDto,
-  CurrentUserResponseDto,
-  ChangePasswordResponseDto,
-} from './dto/auth-response.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private service: AuthService,
+    private config: ConfigService,
+  ) {}
 
-  @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Get current user information',
-    description:
-      'Retrieve the profile information of the currently authenticated user',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Current user information retrieved successfully',
-    type: CurrentUserResponseDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  async getCurrentUser(@Req() req: Request) {
-    const user = req?.user as { userId: number };
-    return await this.authService.getCurrentUser(user.userId);
+  /**
+   * Get current user info
+   * @param userId - Extracted from JWT token
+   */
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/me')
+  async me(@Auth('id') userId: number) {
+    return this.service.getUser(userId);
   }
 
-  @Post('login')
-  @ApiOperation({
-    summary: 'User login',
-    description:
-      'Authenticate user with email and password to receive access tokens',
-  })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User logged in successfully',
-    type: LoginResponseDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid credentials - Wrong email or password',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Validation failed - Invalid input data',
-  })
-  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const response = await this.authService.login(loginDto);
+  /**
+   * Register a new user
+   * @param data - RegisterDto
+   */
+  @Post('register')
+  async register(@Body() data: RegisterDto) {
+    return this.service.register(data);
+  }
 
-    if (!response) {
-      return res.status(401).json({
-        message: 'Invalid credentials',
-        status: 'error',
-        statusCode: 401,
-      });
+  /**
+   * Login user and return JWT token
+   * @param data - LoginDto
+   */
+  @Post('login')
+  async login(@Body() data: LoginDto, @Res() res: Response) {
+    const result = await this.service.login(data);
+    if (!result?.refreshToken) {
+      throw new BadRequestException('Login failed, no refresh token provided');
+    }
+    const { refreshToken, ...rest } = result;
+    this.setRefreshCookie(res, refreshToken);
+    return res.json(rest);
+  }
+
+  /**
+   * Forgot Password - send reset link to email
+   * @param data - ForgotPasswordDto
+   */
+  @Post('forgot-password')
+  async forgotPassword(@Body() data: ForgotPasswordDto) {
+    return this.service.forgotPassword(data);
+  }
+
+  /**
+   * Reset Password using token from email
+   * @param data - ResetPasswordDto
+   */
+  @Post('reset-password')
+  async resetPassword(@Body() data: ResetPasswordDto) {
+    return this.service.resetPassword(data);
+  }
+
+  /**
+   * Update Password for logged-in user
+   * @param data - UpdatePasswordDto
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch('/update-password')
+  async updatePassword(
+    @Body() data: UpdatePasswordDto,
+    @Auth('id') userId: number,
+  ) {
+    return this.service.updatePassword(data, userId);
+  }
+
+  /**
+   * Logout user by clearing refresh token cookie
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    this.clearRefreshCookie(res);
+    return {
+      message: 'Logged out successfully',
+    };
+  }
+
+  /**
+   * Refresh access token using refresh token from cookie or body.
+   * Side effects: Rotates HttpOnly refresh-token cookie when refreshed.
+   */
+  @Post('refresh')
+  async refresh(
+    @Req() req: { cookies?: Record<string, string> },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const cookieName =
+      this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
+    const oldRefreshToken = req?.cookies ? req.cookies[cookieName] : undefined;
+
+    console.log('Old Refresh Token:', oldRefreshToken);
+
+    if (!oldRefreshToken) {
+      throw new BadRequestException('Invalid Session, please log in again');
     }
 
-    const { refreshToken, ...rest } = response;
+    const r = await this.service.refreshAccessToken(oldRefreshToken);
 
-    // set cookies for refresh and access tokens
-    res?.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
+    const { refreshToken, ...restResponse } = r;
 
-    res.json(rest);
+    if (refreshToken) this.setRefreshCookie(res, refreshToken);
+
+    return restResponse;
   }
 
-  @Post('register')
-  @ApiOperation({
-    summary: 'User registration',
-    description: 'Create a new user account with email and password',
-  })
-  @ApiBody({ type: RegisterDto })
-  @ApiResponse({
-    status: 201,
-    description: 'User registered successfully',
-    type: RegisterResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Email already exists',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Validation failed - Invalid input data',
-  })
-  async register(@Body() registerDto: RegisterDto) {
-    return await this.authService.register(registerDto);
+  /*=================================*/
+  /*============ Utils ===============*/
+  /*=================================*/
+
+  private setRefreshCookie(res: Response, token: string) {
+    const secure = this.config.get<string>('NODE_ENV') === 'production';
+    const sameSiteEnv = this.config.get<string>('COOKIE_SAME_SITE') ?? 'Lax';
+    const sameSite = ['Lax', 'Strict', 'None'].includes(sameSiteEnv)
+      ? sameSiteEnv
+      : 'Lax';
+    const ttl = this.config.get<string>('JWT_REFRESH_TTL') ?? '30d';
+    const refreshTokenKey =
+      this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
+
+    const seconds = this.parseTtlToSeconds(ttl);
+
+    const parts = [
+      `${refreshTokenKey}=${token}`,
+      'HttpOnly',
+      'Path=/',
+      `SameSite=${sameSite}`,
+      `Max-Age=${seconds}`,
+    ];
+    if (secure || sameSite === 'None') parts.push('Secure');
+    res.setHeader('Set-Cookie', parts.join('; '));
   }
 
-  @Post('forgot-password')
-  @ApiOperation({
-    summary: 'Request password reset',
-    description: 'Send a password reset token to the user email address',
-  })
-  @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password reset email sent successfully',
-    type: ForgotPasswordResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found with the provided email',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Validation failed - Invalid email format',
-  })
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return await this.authService.forgotPassword(dto.email);
+  /**
+   * Clear the refresh token cookie by setting Max-Age=0 with same attributes.
+   */
+  private clearRefreshCookie(res: Response) {
+    const secure = this.config.get<string>('NODE_ENV') === 'production';
+    const sameSiteEnv = process.env.COOKIE_SAMESITE || 'Lax';
+    const sameSite = ['Lax', 'Strict', 'None'].includes(sameSiteEnv)
+      ? sameSiteEnv
+      : 'Lax';
+    const refreshTokenKey =
+      this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
+    const parts = [
+      `${refreshTokenKey}=`,
+      'HttpOnly',
+      'Path=/',
+      `SameSite=${sameSite}`,
+      'Max-Age=0',
+    ];
+    if (secure || sameSite === 'None') parts.push('Secure');
+    res.setHeader('Set-Cookie', parts.join('; '));
   }
 
-  @Post('reset-password')
-  @ApiOperation({
-    summary: 'Reset password',
-    description: 'Reset user password using the token received via email',
-  })
-  @ApiBody({ type: ResetPasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password reset successfully',
-    type: ResetPasswordResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid or expired reset token',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Validation failed - Invalid input data',
-  })
-  async resetPassword(@Body() dto: ResetPasswordDto) {
-    return await this.authService.resetPassword(dto.token, dto.newPassword);
-  }
-
-  @Post('change-password')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Change password for authenticated user',
-    description:
-      'Change the password for the currently authenticated user by providing current password',
-  })
-  @ApiBody({ type: ChangePasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password changed successfully',
-    type: ChangePasswordResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description:
-      'Bad request - Current password incorrect or new passwords do not match',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Validation failed - Invalid input data',
-  })
-  async changePassword(
-    @Req() req: Request,
-    @Body() changePasswordDto: ChangePasswordDto,
-  ) {
-    const user = req?.user as { userId: number };
-    return await this.authService.changePassword(
-      user.userId,
-      changePasswordDto.currentPassword,
-      changePasswordDto.newPassword,
-      changePasswordDto.confirmNewPassword,
-    );
+  /**
+   * Parse TTL strings like "15m", "30d", "3600" into seconds.
+   * Fallback: 30 days when parsing fails.
+   */
+  private parseTtlToSeconds(ttl: string): number {
+    const m = /^([0-9]+)([smhd])?$/.exec(ttl.trim());
+    if (!m) return 30 * 24 * 60 * 60;
+    const n = parseInt(m[1], 10);
+    const unit = m[2] || 's';
+    switch (unit) {
+      case 'd':
+        return n * 24 * 60 * 60;
+      case 'h':
+        return n * 60 * 60;
+      case 'm':
+        return n * 60;
+      default:
+        return n;
+    }
   }
 }

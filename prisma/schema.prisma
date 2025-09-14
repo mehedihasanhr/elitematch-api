@@ -25,7 +25,6 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  agePreference                       AgePreference?                @relation("AgePreferenceUser")
   createdAgePreferences               AgePreference[]               @relation("AgePreferenceCreator")
   updatedAgePreferences               AgePreference[]               @relation("ProfileUpdatedBy")
   physicalAttributes                  PhysicalAttribute[]           @relation("PhysicalAttributeCreator")
@@ -73,6 +72,7 @@ model User {
   comment                             Comment[]
   subscription                        Subscription[]
   profile                             Profile?
+  agePreferenceId                     Int?
 
   @@map("users")
 }
@@ -201,10 +201,10 @@ model Profile {
 }
 
 model LuxuryAlignment {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -218,10 +218,10 @@ model LuxuryAlignment {
 }
 
 model SocialCircle {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -235,10 +235,10 @@ model SocialCircle {
 }
 
 model WellnessInterest {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -252,10 +252,10 @@ model WellnessInterest {
 }
 
 model IntellectualInterest {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -269,10 +269,10 @@ model IntellectualInterest {
 }
 
 model PersonalInterest {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -286,10 +286,10 @@ model PersonalInterest {
 }
 
 model PersonalityTrait {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -303,10 +303,10 @@ model PersonalityTrait {
 }
 
 model FamilyAspiration {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -320,10 +320,10 @@ model FamilyAspiration {
 }
 
 model RelationshipTimeline {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -337,10 +337,10 @@ model RelationshipTimeline {
 }
 
 model IdealRelationship {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -354,10 +354,10 @@ model IdealRelationship {
 }
 
 model RelationshipExpectation {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -371,10 +371,10 @@ model RelationshipExpectation {
 }
 
 model Relocation {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -388,10 +388,10 @@ model Relocation {
 }
 
 model SocialActivity {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -405,10 +405,10 @@ model SocialActivity {
 }
 
 model CulturalReligiousPreference {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -422,10 +422,10 @@ model CulturalReligiousPreference {
 }
 
 model CoreValues {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -439,10 +439,10 @@ model CoreValues {
 }
 
 model LifeStyle {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -458,8 +458,8 @@ model LifeStyle {
 }
 
 model AgePreference {
-  userId Int  @unique() @map("user_id")
-  user   User @relation("AgePreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -475,10 +475,10 @@ model AgePreference {
 }
 
 model PhysicalAttribute {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -492,10 +492,10 @@ model PhysicalAttribute {
 }
 
 model BackgroundPreference {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -509,10 +509,10 @@ model BackgroundPreference {
 }
 
 model PartnerQuality {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -526,10 +526,10 @@ model PartnerQuality {
 }
 
 model Religion {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -543,10 +543,10 @@ model Religion {
 }
 
 model Ethnicity {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  profileId Int     @map("profile_id")
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   createdBy Int      @map("created_by")
@@ -561,19 +561,39 @@ model Ethnicity {
 
 // Blog management
 model Blog {
-  id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(255)
-  slug        String    @unique @db.VarChar(255)
-  content     String    @db.Text
-  authorId    Int       @map("author_id")
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  isPublished Boolean   @default(false) @map("is_published")
-  publishedAt DateTime? @map("published_at")
-  coverImage  String?   @map("cover_image") @db.VarChar(255)
-  comments    Comment[] @relation("BlogToComment")
+  id          Int           @id @default(autoincrement())
+  title       String        @db.VarChar(255)
+  slug        String        @unique @db.VarChar(255)
+  content     String        @db.Text
+  authorId    Int           @map("author_id")
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  isPublished Boolean       @default(false) @map("is_published")
+  publishedAt DateTime?     @map("published_at")
+  coverImage  String?       @map("cover_image") @db.VarChar(255)
+  comments    Comment[]     @relation("BlogToComment")
   blogTags    BlogTag[]
+  categoryId  Int?          @map("category_id")
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+}
+
+model BlogCategory {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(255)
+  slug  String @unique @db.VarChar(255)
+  blogs Blog[]
+
+  @@map("blog_categories")
+}
+
+model BlogTag {
+  id     Int    @id @default(autoincrement())
+  name   String @db.VarChar(50)
+  blogId Int    @map("blog_id")
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@map("blog_tags")
 }
 
 model Comment {
@@ -587,15 +607,6 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("comments")
-}
-
-model BlogTag {
-  id     Int    @id @default(autoincrement())
-  name   String @db.VarChar(50)
-  blogId Int    @map("blog_id")
-  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
-
-  @@map("blog_tags")
 }
 
 model Cms {

@@ -1,12 +1,17 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsUrl } from 'class-validator';
 
 export class ForgotPasswordDto {
-  @ApiProperty({
-    description: 'User email address for password reset',
-    example: 'user@example.com',
-  })
-  @IsEmail({}, { message: 'Invalid email address' })
+  @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email is required' })
   email: string;
+
+  @IsUrl(
+    {
+      require_tld: false,
+      require_protocol: false,
+    },
+    { message: 'Invalid URL format' },
+  )
+  @IsNotEmpty({ message: 'Password reset URL is required' })
+  resetUrl: string;
 }

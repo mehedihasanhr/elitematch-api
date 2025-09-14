@@ -5,9 +5,12 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   const corOrigins = process.env.CORS_ORIGINS ?? '*';
 
   // Serve static files for favicon and other assets
@@ -25,8 +28,8 @@ async function bootstrap() {
     origin: corOrigins.split(','),
     credentials: true,
   });
-
-  // configure global prefix
+  // cookies
+  app.use(cookieParser());
 
   // configure global pipes
   app.useGlobalPipes(
