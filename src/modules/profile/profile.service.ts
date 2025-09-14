@@ -25,7 +25,7 @@ export class ProfileService {
     const payload: Prisma.ProfileUncheckedCreateInput = {
       userId: data.userId,
       avatar: data.avatar,
-      occupation: data.occupation,
+      occupationId: data.occupationId ?? undefined,
       dateOfBirth: new Date(data.dateOfBirth),
       bio: data.bio,
       city: data.city,
@@ -77,7 +77,14 @@ export class ProfileService {
       {} as Prisma.ProfileUncheckedUpdateInput;
     if (data.userId !== undefined) payload.userId = data.userId;
     if (data.avatar !== undefined) payload.avatar = data.avatar;
-    if (data.occupation !== undefined) payload.occupation = data.occupation;
+    if (data.occupationId !== undefined)
+      payload.occupationId = data.occupationId;
+    if (data.educationLevelId !== undefined)
+      payload.educationLevelId = data.educationLevelId;
+    if (data.incomeRangeId !== undefined)
+      payload.incomeRangeId = data.incomeRangeId;
+    if (data.relationshipStatusId !== undefined)
+      payload.relationshipStatusId = data.relationshipStatusId;
     if (data.dateOfBirth !== undefined) {
       payload.dateOfBirth = new Date(data.dateOfBirth);
     }

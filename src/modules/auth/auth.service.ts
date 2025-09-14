@@ -93,7 +93,8 @@ export class AuthService {
     return {
       data: await this.userMap(user.id),
       message: 'User registered successfully',
-      status: 201,
+      status: 'success',
+      statusCode: 201,
     };
   }
 
@@ -132,6 +133,7 @@ export class AuthService {
       refreshToken,
       message: 'Login successful',
       statusCode: 200,
+      status: 'success',
     };
   }
 
@@ -174,7 +176,12 @@ export class AuthService {
       },
     );
 
-    return { message: 'If that email exists, a reset link was sent' };
+    return {
+      data: null,
+      message: 'If that email exists, a reset link was sent',
+      status: 'success',
+      statusCode: 200,
+    };
   }
 
   /**
@@ -198,7 +205,12 @@ export class AuthService {
       where: { id: user.id },
       data: { password, resetToken: null, resetTokenExpiry: null },
     });
-    return { message: 'Password has been reset' };
+    return {
+      data: null,
+      message: 'Password has been reset',
+      status: 'success',
+      statusCode: 200,
+    };
   }
 
   /**
@@ -229,6 +241,7 @@ export class AuthService {
       data: await this.userMap(updatedUser.id),
       message: 'Password updated successfully',
       statusCode: 200,
+      status: 'success',
     };
   }
 
@@ -281,6 +294,8 @@ export class AuthService {
 
       return {
         data: await this.userMap(user.id),
+        status: 'success',
+        statusCode: 200,
         ...tokens,
         message: 'Access token refreshed successfully',
       };

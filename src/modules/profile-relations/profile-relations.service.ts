@@ -21,6 +21,7 @@ export class ProfileRelationsService {
   constructor(private prisma: PrismaService) {}
 
   private supportedModels = new Set([
+    // All profile-related models present in prisma/schema.prisma
     'lifeStyle',
     'coreValues',
     'culturalReligiousPreference',
@@ -42,39 +43,57 @@ export class ProfileRelationsService {
     'backgroundPreference',
     'physicalAttribute',
     'agePreference',
+    'occupation',
+    'educationLevel',
+    'incomeRange',
+    'relationshipStatus',
   ]);
 
   private modelNameToPrismaKey(name: string) {
-    const map: Record<string, string> = {
-      lifeStyle: 'lifeStyle',
-      coreValues: 'coreValues',
-      culturalReligiousPreference: 'culturalReligiousPreference',
-      socialActivity: 'socialActivity',
-      relocation: 'relocation',
-      relationshipExpectation: 'relationshipExpectation',
-      idealRelationship: 'idealRelationship',
-      relationshipTimeline: 'relationshipTimeline',
-      familyAspiration: 'familyAspiration',
-      personalityTrait: 'personalityTrait',
-      personalInterest: 'personalInterest',
-      intellectualInterest: 'intellectualInterest',
-      wellnessInterest: 'wellnessInterest',
-      socialCircle: 'socialCircle',
-      luxuryAlignment: 'luxuryAlignment',
-      ethnicity: 'ethnicity',
-      religion: 'religion',
-      partnerQuality: 'partnerQuality',
-      backgroundPreference: 'backgroundPreference',
-      physicalAttribute: 'physicalAttribute',
-      agePreference: 'agePreference',
-    };
-    return map[name];
+    // Accept flexible model param formats (case insensitive, dash/underscore allowed)
+    const canonical = (s: string) => s.replace(/[-_\s]/g, '').toLowerCase();
+    const known = [
+      'lifeStyle',
+      'coreValues',
+      'culturalReligiousPreference',
+      'socialActivity',
+      'relocation',
+      'relationshipExpectation',
+      'idealRelationship',
+      'relationshipTimeline',
+      'familyAspiration',
+      'personalityTrait',
+      'personalInterest',
+      'intellectualInterest',
+      'wellnessInterest',
+      'socialCircle',
+      'luxuryAlignment',
+      'ethnicity',
+      'religion',
+      'partnerQuality',
+      'backgroundPreference',
+      'physicalAttribute',
+      'agePreference',
+      'occupation',
+      'educationLevel',
+      'incomeRange',
+      'relationshipStatus',
+    ];
+
+    const inputKey = canonical(name);
+    for (const k of known) {
+      if (canonical(k) === inputKey) return k;
+    }
+    return undefined;
   }
 
   private ensureSupported(model: string) {
-    if (!this.supportedModels.has(model)) {
+    // normalize incoming names and verify supported list
+    const key = this.modelNameToPrismaKey(model);
+    if (!key || !this.supportedModels.has(key)) {
       throw new BadRequestException(`Model ${model} not supported`);
     }
+    return key;
   }
 
   /**
@@ -101,8 +120,7 @@ export class ProfileRelationsService {
     dto: CreateRelationDto,
     userId?: number,
   ): Promise<unknown> {
-    this.ensureSupported(model);
-    const key = this.modelNameToPrismaKey(model);
+    const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
 
     const data = { ...dto } as Record<string, unknown>;
@@ -121,8 +139,7 @@ export class ProfileRelationsService {
    * Returns an array of records.
    */
   async findAll(model: string): Promise<unknown[]> {
-    this.ensureSupported(model);
-    const key = this.modelNameToPrismaKey(model);
+    const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
     return await delegate.findMany();
   }
@@ -131,8 +148,7 @@ export class ProfileRelationsService {
    * Retrieve a single record by id. Throws NotFoundException when missing.
    */
   async findOne(model: string, id: number): Promise<unknown> {
-    this.ensureSupported(model);
-    const key = this.modelNameToPrismaKey(model);
+    const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
     const item = await delegate.findUnique({ where: { id } });
     if (!item) throw new NotFoundException();
@@ -148,8 +164,7 @@ export class ProfileRelationsService {
     dto: UpdateRelationDto,
     userId?: number,
   ): Promise<unknown> {
-    this.ensureSupported(model);
-    const key = this.modelNameToPrismaKey(model);
+    const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
     const data = { ...dto } as Record<string, unknown>;
     if (userId !== undefined) data['updatedBy'] = userId;
@@ -160,8 +175,7 @@ export class ProfileRelationsService {
    * Permanently delete a record by id. Returns the deleted record.
    */
   async remove(model: string, id: number): Promise<unknown> {
-    this.ensureSupported(model);
-    const key = this.modelNameToPrismaKey(model);
+    const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
     return await delegate.delete({ where: { id } });
   }

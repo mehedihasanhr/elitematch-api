@@ -40,9 +40,18 @@ export class CreateProfileDto {
     description: 'User occupation',
     required: true,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  occupation: string;
+  occupation?: string;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Occupation id (preferred)',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  occupationId?: number;
 
   @ApiProperty({
     example: '1990-01-01T00:00:00.000Z',
@@ -58,27 +67,54 @@ export class CreateProfileDto {
     description: 'Education level',
     required: true,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  educationLevel: string;
+  educationLevel?: string;
+
+  @ApiProperty({
+    example: 2,
+    description: 'Education level id (preferred)',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  educationLevelId?: number;
 
   @ApiProperty({
     example: '$50,000 - $100,000',
     description: 'Income range',
     required: true,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  incomeRange: string;
+  incomeRange?: string;
+
+  @ApiProperty({
+    example: 4,
+    description: 'Income range id (preferred)',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  incomeRangeId?: number;
 
   @ApiProperty({
     example: 'Single',
     description: 'Relationship status',
     required: true,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  relationshipStatus: string;
+  relationshipStatus?: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Relationship status id (preferred)',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  relationshipStatusId?: number;
 
   @ApiProperty({
     example: 'Male',

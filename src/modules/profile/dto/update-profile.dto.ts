@@ -16,9 +16,20 @@ export class UpdateProfileDto {
 
   @ApiProperty({ example: 'Software Engineer', required: false })
   occupation?: string;
+  @ApiProperty({ example: 3, required: false })
+  occupationId?: number;
 
   @ApiProperty({ example: '1990-01-01T00:00:00.000Z', required: false })
   dateOfBirth?: string;
+
+  @ApiProperty({ example: 2, required: false })
+  educationLevelId?: number;
+
+  @ApiProperty({ example: 4, required: false })
+  incomeRangeId?: number;
+
+  @ApiProperty({ example: 1, required: false })
+  relationshipStatusId?: number;
 
   @ApiProperty({
     example: 'A short bio',

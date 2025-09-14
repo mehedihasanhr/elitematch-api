@@ -8,35 +8,33 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  email            String    @unique @db.VarChar(255)
-  firstName        String    @map("first_name") @db.VarChar(255)
-  lastName         String    @map("last_name") @db.VarChar(255)
-  avatarId         Int?      @map("avatar_id")
-  avatar           File?     @relation(fields: [avatarId], references: [id])
-  password         String    @map("password") @db.VarChar(255)
-  resetToken       String?   @map("reset_token") @db.VarChar(255)
-  resetTokenExpiry DateTime? @map("reset_token_expiry")
-  stripeCustomerId String?   @map("stripe_customer_id") @db.VarChar(255)
-  isVerified       Boolean   @default(false) @map("is_verified")
-  roleId           Int?      @map("role_id")
-  role             Role?     @relation(fields: [roleId], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
+  id                                  Int                           @id @default(autoincrement())
+  email                               String                        @unique @db.VarChar(255)
+  firstName                           String                        @map("first_name") @db.VarChar(255)
+  lastName                            String                        @map("last_name") @db.VarChar(255)
+  avatarId                            Int?                          @map("avatar_id")
+  avatar                              File?                         @relation(fields: [avatarId], references: [id])
+  password                            String                        @map("password") @db.VarChar(255)
+  resetToken                          String?                       @map("reset_token") @db.VarChar(255)
+  resetTokenExpiry                    DateTime?                     @map("reset_token_expiry")
+  stripeCustomerId                    String?                       @map("stripe_customer_id") @db.VarChar(255)
+  isVerified                          Boolean                       @default(false) @map("is_verified")
+  roleId                              Int?                          @map("role_id")
+  role                                Role?                         @relation(fields: [roleId], references: [id])
+  createdAt                           DateTime                      @default(now()) @map("created_at")
+  updatedAt                           DateTime                      @updatedAt @map("updated_at")
   createdAgePreferences               AgePreference[]               @relation("AgePreferenceCreator")
-  updatedAgePreferences               AgePreference[]               @relation("ProfileUpdatedBy")
+  updatedAgePreferences               AgePreference[]               @relation("AgePreferenceUpdatedBy")
   physicalAttributes                  PhysicalAttribute[]           @relation("PhysicalAttributeCreator")
   updatedPhysicalAttributes           PhysicalAttribute[]           @relation("PhysicalAttributeUpdatedBy")
   backgroundPreferences               BackgroundPreference[]        @relation("BackgroundPreferenceCreator")
   updatedBackgroundPreferences        BackgroundPreference[]        @relation("BackgroundPreferenceUpdatedBy")
   partnerQualities                    PartnerQuality[]              @relation("PartnerQualityCreator")
-  updatedPartnerQualities             PartnerQuality[]              @relation("BackgroundPreferenceUpdatedBy")
+  updatedPartnerQualities             PartnerQuality[]              @relation("PartnerQualityUpdatedBy")
   religions                           Religion[]                    @relation("ReligionCreator")
-  updatedReligions                    Religion[]                    @relation("BackgroundPreferenceUpdatedBy")
+  updatedReligions                    Religion[]                    @relation("ReligionUpdatedBy")
   ethnicities                         Ethnicity[]                   @relation("EthnicityCreator")
-  updatedEthnicities                  Ethnicity[]                   @relation("BackgroundPreferenceUpdatedBy")
+  updatedEthnicities                  Ethnicity[]                   @relation("EthnicityUpdatedBy")
   createdLifeStyles                   LifeStyle[]                   @relation("LifeStyleCreator")
   updatedLifeStyles                   LifeStyle[]                   @relation("LifeStyleUpdatedBy")
   createdLuxuryAlignments             LuxuryAlignment[]             @relation("LuxuryAlignmentCreator")
@@ -73,6 +71,14 @@ model User {
   subscription                        Subscription[]
   profile                             Profile?
   agePreferenceId                     Int?
+  relationshipStatus                  RelationshipStatus[]          @relation("RelationshipStatusCreator")
+  updatedRelationshipStatus           RelationshipStatus[]          @relation("RelationshipStatusUpdatedBy")
+  incomeRange                         IncomeRange[]                 @relation("IncomeRangeCreator")
+  updatedIncomeRange                  IncomeRange[]                 @relation("IncomeRangeUpdatedBy")
+  educationLevel                      EducationLevel[]              @relation("EducationLevelCreator")
+  updatedEducationLevel               EducationLevel[]              @relation("EducationLevelUpdatedBy")
+  occupation                          Occupation[]                  @relation("OccupationCreator")
+  updatedOccupation                   Occupation[]                  @relation("OccupationUpdatedBy")
 
   @@map("users")
 }
@@ -126,7 +132,7 @@ model Role {
 model Permission {
   id             Int              @id @default(autoincrement())
   name           String           @db.VarChar(255)
-  permissioin    String           @db.VarChar(255)
+  permission     String           @db.VarChar(255)
   model          String           @db.VarChar(255)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
@@ -153,34 +159,38 @@ model Profile {
   id                                  Int                           @id @default(autoincrement())
   userId                              Int                           @unique() @map("user_id")
   user                                User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  avatar                              String                        @db.VarChar(255)
-  introductionVideoLink               String                        @map("introduction_video_link") @db.VarChar(255)
-  occupation                          String                        @db.VarChar(255)
+  avatar                              String?                       @db.VarChar(255)
+  introductionVideoLink               String?                       @map("introduction_video_link") @db.VarChar(255)
   dateOfBirth                         DateTime                      @map("date_of_birth")
-  educationLevel                      String                        @db.VarChar(255)
-  incomeRange                         String                        @map("income_range") @db.VarChar(255)
-  relationshipStatus                  String                        @map("relationship_status") @db.VarChar(255)
-  gender                              String                        @db.VarChar(255)
-  bio                                 String                        @db.Text
-  city                                String                        @db.VarChar(255)
-  state                               String                        @db.VarChar(255)
-  zipCode                             String                        @map("zip_code") @db.VarChar(20)
-  country                             String                        @db.VarChar(255)
-  height                              String                        @db.VarChar(50)
-  weight                              String                        @db.VarChar(50)
+  occupationId                        Int?                          @map("occupation_id")
+  occupation                          Occupation?                   @relation(fields: [occupationId], references: [id], onDelete: Cascade)
+  educationLevelId                    Int?                          @map("education_level_id")
+  educationLevel                      EducationLevel?               @relation(fields: [educationLevelId], references: [id], onDelete: Cascade)
+  incomeRangeId                       Int?                          @map("income_range_id")
+  incomeRange                         IncomeRange?                  @relation(fields: [incomeRangeId], references: [id], onDelete: Cascade)
+  relationshipStatusId                Int?                          @map("relationship_status_id")
+  relationshipStatus                  RelationshipStatus?           @relation(fields: [relationshipStatusId], references: [id], onDelete: Cascade)
+  gender                              String?                       @db.VarChar(255)
+  bio                                 String?                       @db.Text
+  city                                String?                       @db.VarChar(255)
+  state                               String?                       @db.VarChar(255)
+  zipCode                             String?                       @map("zip_code") @db.VarChar(20)
+  country                             String?                       @db.VarChar(255)
+  height                              String?                       @db.VarChar(50)
+  weight                              String?                       @db.VarChar(50)
   noOfChildren                        Int?                          @default(0) @map("no_of_children")
+  specificPartnerPreferences          String?                       @map("specific_partner_preferences") @db.Text
+  expectationsFromMatchmaker          String?                       @map("expectations_from_matchmaker") @db.Text
+  questionForMatchmaker               String?                       @map("question_for_matchmaker") @db.Text
+  pastRelationshipExperience          String?                       @map("past_relationship_experience") @db.Text
+  lessonsLearnedFromPastRelationships String?                       @map("lessons_learned_from_past_relationships") @db.Text
+  patternsToAvoidInRelationships      String?                       @map("patterns_to_avoid_in_relationships") @db.Text
   ethnicities                         Ethnicity[]
   religions                           Religion[]
   partnerQualities                    PartnerQuality[]
   backgroundPreferences               BackgroundPreference[]
   physicalAttributes                  PhysicalAttribute[]
   agePreferences                      AgePreference[]
-  specificPartnerPreferences          String                        @map("specific_partner_preferences") @db.Text
-  expectationsFromMatchmaker          String                        @map("expectations_from_matchmaker") @db.Text
-  questionForMatchmaker               String                        @map("question_for_matchmaker") @db.Text
-  pastRelationshipExperience          String                        @map("past_relationship_experience") @db.Text
-  lessonsLearnedFromPastRelationships String                        @map("lessons_learned_from_past_relationships") @db.Text
-  patternsToAvoidInRelationships      String                        @map("patterns_to_avoid_in_relationships") @db.Text
   lifeStyle                           LifeStyle[]
   coreValues                          CoreValues[]
   culturalReligiousPreferences        CulturalReligiousPreference[]
@@ -198,6 +208,91 @@ model Profile {
   luxuryAlignment                     LuxuryAlignment[]
 
   @@map("profiles")
+}
+
+model RelationshipStatus {
+  id       Int       @id @default(autoincrement())
+  status   String    @db.VarChar(255)
+  // relation defined on Profile (relationshipStatusId)
+  profiles Profile[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("RelationshipStatusCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("RelationshipStatusUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("relationship_statuses")
+}
+
+model IncomeRange {
+  id       Int       @id @default(autoincrement())
+  range    String    @db.VarChar(255)
+  // relation defined on Profile (incomeRangeId)
+  profiles Profile[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("IncomeRangeCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("IncomeRangeUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("income_ranges")
+}
+
+model EducationLevel {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(255)
+  // relation defined on Profile (educationLevelId)
+  profiles Profile[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("EducationLevelCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("EducationLevelUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("education_levels")
+}
+
+model Occupation {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(255)
+  // relation defined on Profile (occupationId)
+  profiles Profile[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("OccupationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("OccupationUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("occupations")
+}
+
+model Relocation {
+  id        Int      @id @default(autoincrement())
+  location  String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("RelocationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("RelocationUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("relocations")
 }
 
 model LuxuryAlignment {
@@ -370,23 +465,6 @@ model RelationshipExpectation {
   @@map("relationship_expectations")
 }
 
-model Relocation {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  profileId Int?     @map("profile_id")
-  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  createdBy Int      @map("created_by")
-  creator   User     @relation("RelocationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
-
-  updatedAt DateTime @updatedAt @map("updated_at")
-  updatedBy Int      @map("updated_by")
-  updator   User     @relation("RelocationUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
-
-  @@map("relocations")
-}
-
 model SocialActivity {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(255)
@@ -467,7 +545,7 @@ model AgePreference {
 
   updatedAt DateTime @updatedAt @map("updated_at")
   updatedBy Int      @map("updated_by")
-  updator   User     @relation("ProfileUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  updator   User     @relation("AgePreferenceUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
   Profile   Profile? @relation(fields: [profileId], references: [id])
   profileId Int?
 
@@ -520,7 +598,7 @@ model PartnerQuality {
 
   updatedAt DateTime @updatedAt @map("updated_at")
   updatedBy Int      @map("updated_by")
-  updator   User     @relation("BackgroundPreferenceUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  updator   User     @relation("PartnerQualityUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
 
   @@map("partner_qualities")
 }
@@ -537,7 +615,7 @@ model Religion {
 
   updatedAt DateTime @updatedAt @map("updated_at")
   updatedBy Int      @map("updated_by")
-  updator   User     @relation("BackgroundPreferenceUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  updator   User     @relation("ReligionUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
 
   @@map("religions")
 }
@@ -554,7 +632,7 @@ model Ethnicity {
 
   updatedAt DateTime @updatedAt @map("updated_at")
   updatedBy Int      @map("updated_by")
-  updator   User     @relation("BackgroundPreferenceUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  updator   User     @relation("EthnicityUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
 
   @@map("ethnicities")
 }
