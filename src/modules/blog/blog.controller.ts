@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,6 +19,7 @@ import {
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('blogs')
 @Controller('blogs')
@@ -27,6 +29,7 @@ export class BlogController {
   /**
    * Create a new blog post
    */
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create blog' })
   @ApiBody({ type: CreateBlogDto })
