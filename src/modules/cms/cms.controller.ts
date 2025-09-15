@@ -17,6 +17,7 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { ApiQuery, ApiBody } from '@nestjs/swagger';
 import { CmsService, PaginatedResult } from './cms.service';
 import { Cms } from '@prisma/client';
 import { CreateCmsDto } from './dto/create-cms.dto';
@@ -31,6 +32,7 @@ export class CmsController {
   @Post()
   @ApiOperation({ summary: 'Create CMS entry' })
   @ApiCreatedResponse({ description: 'CMS entry created' })
+  @ApiBody({ type: CreateCmsDto })
   @ApiBadRequestResponse({ description: 'Validation error / slug exists' })
   create(@Body() dto: CreateCmsDto) {
     return this.cmsService.create(dto);
@@ -39,6 +41,10 @@ export class CmsController {
   @Get()
   @ApiOperation({ summary: 'List CMS entries (paginated)' })
   @ApiOkResponse({ description: 'List returned' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'type', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
   findAll(@Query() query: QueryCmsDto): Promise<PaginatedResult<Cms>> {
     return this.cmsService.findAll(query);
   }
@@ -54,6 +60,7 @@ export class CmsController {
   @Put(':id')
   @ApiOperation({ summary: 'Update CMS entry' })
   @ApiOkResponse({ description: 'CMS entry updated' })
+  @ApiBody({ type: UpdateCmsDto })
   @ApiNotFoundResponse({ description: 'Not found' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCmsDto) {
     return this.cmsService.update(id, dto);
