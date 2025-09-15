@@ -1,13 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileService } from 'src/cores/modules/file/file.service';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 
 @Injectable()
 export class FileUploadService {
-  constructor(
-    private prisma: PrismaService,
-    private fileService: FileService,
-  ) {}
+  constructor(private fileService: FileService) {}
 
   /**
    * Upload a file and save its metadata to the database.
