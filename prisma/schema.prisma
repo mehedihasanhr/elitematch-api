@@ -84,20 +84,21 @@ model User {
 }
 
 model File {
-  id           Int      @id @default(autoincrement())
-  originalName String   @map("original_name")
+  id           Int       @id @default(autoincrement())
+  originalName String    @map("original_name")
   mimeType     String
   fileSize     Int
   width        Int
   height       Int
-  hash         String   @unique
+  hash         String    @unique
   url          String
   path         String
   extension    String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
   uploadedBy   Int?
   user         User[]
+  profile      Profile[]
 
   @@index([originalName], name: "idx_file_original_name")
   @@index([hash], name: "idx_file_hash")
@@ -159,7 +160,8 @@ model Profile {
   id                                  Int                           @id @default(autoincrement())
   userId                              Int                           @unique() @map("user_id")
   user                                User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  avatar                              String?                       @db.VarChar(255)
+  avatarId                            Int?                          @map("avatar_id")
+  avatar                              File?                         @relation(fields: [avatarId], references: [id])
   introductionVideoLink               String?                       @map("introduction_video_link") @db.VarChar(255)
   dateOfBirth                         DateTime                      @map("date_of_birth")
   occupationId                        Int?                          @map("occupation_id")

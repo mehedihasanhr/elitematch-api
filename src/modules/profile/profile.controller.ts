@@ -6,7 +6,10 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,10 +17,13 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from '../../cores/config/multer.conf';
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -28,10 +34,6 @@ export class ProfileController {
    */
   constructor(private readonly service: ProfileService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create profile' })
-  @ApiBody({ type: CreateProfileDto })
-  @ApiResponse({ status: 201, description: 'Profile created' })
   /**
    * HTTP POST /profiles
    *
@@ -41,12 +43,22 @@ export class ProfileController {
    * @param dto - CreateProfileDto containing the profile payload.
    * @returns The created profile record.
    */
-  create(@Body() dto: CreateProfileDto) {
-    return this.service.create(dto);
+  @Post()
+  @UseInterceptors(FileInterceptor('avatar', multerOptions))
+  @ApiOperation({ summary: 'Create profile' })
+  @ApiBody({ type: CreateProfileDto })
+  @ApiResponse({ status: 201, description: 'Profile created' })
+  create(
+    @Body() dto: CreateProfileDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.service.create(dto, file);
   }
 
   @Get()
   @ApiOperation({ summary: 'List profiles' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of profiles' })
   /**
    * HTTP GET /profiles
@@ -56,8 +68,8 @@ export class ProfileController {
    *
    * @returns Array of profile records.
    */
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.service.findAll(page ?? 1, limit ?? 20);
   }
 
   @Get(':id')

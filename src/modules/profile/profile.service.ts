@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { paginate } from 'src/utils/paginate';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { FileService } from '../../cores/modules/file/file.service';
 
 @Injectable()
 export class ProfileService {
@@ -10,7 +12,10 @@ export class ProfileService {
    * ProfileService constructor
    * @param prisma - PrismaService instance used to access the database.
    */
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fileService: FileService,
+  ) {}
 
   /**
    * Create a new profile record.
@@ -21,17 +26,56 @@ export class ProfileService {
    * @param data - DTO containing profile fields supplied by the client.
    * @returns The newly created profile record.
    */
-  async create(data: CreateProfileDto) {
+  async create(data: CreateProfileDto, file: Express.Multer.File) {
+    let coverId: number | null = null;
+
+    if (file) {
+      const savedFile = await this.fileService.processAndSaveFile(file);
+      coverId = savedFile.id;
+    }
+
     const payload: Prisma.ProfileUncheckedCreateInput = {
       userId: data.userId,
-      avatar: data.avatar,
-      occupationId: data.occupationId ?? undefined,
+      avatarId: coverId ?? undefined,
+      introductionVideoLink: data.introductionVideoLink,
       dateOfBirth: new Date(data.dateOfBirth),
-      bio: data.bio,
-      city: data.city,
+      occupationId: data.occupationId ?? undefined,
+      educationLevelId: data.educationLevelId ?? undefined,
+      incomeRangeId: data.incomeRangeId ?? undefined,
+      relationshipStatusId: data.relationshipStatusId ?? undefined,
+      gender: data.gender ?? undefined,
+      bio: data.bio ?? undefined,
+      city: data.city ?? undefined,
+      state: data.state ?? undefined,
+      zipCode: data.zipCode ?? undefined,
+      country: data.country ?? undefined,
+      height: data.height ?? undefined,
+      weight: data.weight ?? undefined,
+      noOfChildren: data.noOfChildren ?? undefined,
+      specificPartnerPreferences: data.specificPartnerPreferences ?? undefined,
+      expectationsFromMatchmaker: data.expectationsFromMatchmaker ?? undefined,
+      questionForMatchmaker: data.questionForMatchmaker ?? undefined,
+      pastRelationshipExperience: data.pastRelationshipExperience ?? undefined,
+      lessonsLearnedFromPastRelationships:
+        data.lessonsLearnedFromPastRelationships ?? undefined,
+      patternsToAvoidInRelationships:
+        data.patternsToAvoidInRelationships ?? undefined,
     } as Prisma.ProfileUncheckedCreateInput;
 
-    return this.prisma.profile.create({ data: payload });
+    const profile = await this.prisma.profile.create({ data: payload });
+
+    // record file use
+    if (coverId) {
+      await this.prisma.fileUsage.create({
+        data: {
+          fileId: coverId,
+          model: 'profile',
+          modelId: profile.id,
+        },
+      });
+    }
+
+    return profile;
   }
 
   /**
@@ -42,8 +86,18 @@ export class ProfileService {
    *
    * @returns An array of profile records.
    */
-  async findAll() {
-    return this.prisma.profile.findMany();
+  async findAll(page = 1, limit = 20) {
+    const take = Math.max(1, Number(limit));
+    const currentPage = Math.max(1, Number(page));
+
+    const total = await this.prisma.profile.count();
+    const items = await this.prisma.profile.findMany({
+      skip: (currentPage - 1) * take,
+      take,
+      orderBy: { id: 'desc' },
+    });
+
+    return paginate(items, { total, page: currentPage, limit: take });
   }
 
   /**
@@ -72,11 +126,20 @@ export class ProfileService {
    * @param data - DTO containing fields to update.
    * @returns The updated profile record.
    */
-  async update(id: number, data: UpdateProfileDto) {
+  async update(id: number, data: UpdateProfileDto, file?: Express.Multer.File) {
     const payload: Prisma.ProfileUncheckedUpdateInput =
       {} as Prisma.ProfileUncheckedUpdateInput;
+    let newFileId: number | null = null;
+    if (file) {
+      const savedFile = await this.fileService.processAndSaveFile(file);
+      newFileId = savedFile.id;
+    }
     if (data.userId !== undefined) payload.userId = data.userId;
-    if (data.avatar !== undefined) payload.avatar = data.avatar;
+    if (newFileId !== null) {
+      payload.avatarId = newFileId;
+    } else if (data.avatarId !== undefined) {
+      payload.avatarId = data.avatarId;
+    }
     if (data.occupationId !== undefined)
       payload.occupationId = data.occupationId;
     if (data.educationLevelId !== undefined)

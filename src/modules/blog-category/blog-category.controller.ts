@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Get,
+  Query,
   Param,
   Put,
   Delete,
@@ -14,6 +15,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { BlogCategoryService } from './blog-category.service';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
@@ -37,8 +39,11 @@ export class BlogCategoryController {
 
   @Get()
   @ApiOperation({ summary: 'List blog categories' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of categories' })
-  findAll() {
+  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+    // the service currently returns all items; keep compatibility
     return this.service.findAll();
   }
 

@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Get,
+  Query,
   Param,
   Put,
   Delete,
@@ -15,6 +16,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
@@ -40,9 +42,11 @@ export class BlogController {
 
   @Get()
   @ApiOperation({ summary: 'List blogs' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of blogs' })
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.service.findAll(page ?? 1, limit ?? 20);
   }
 
   @Get(':id')

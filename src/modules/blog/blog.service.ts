@@ -3,6 +3,7 @@ import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { paginate } from 'src/utils/paginate';
 
 @Injectable()
 export class BlogService {
@@ -34,8 +35,18 @@ export class BlogService {
    * Retrieve all blog posts.
    * @returns Array of blog records
    */
-  async findAll() {
-    return this.prisma.blog.findMany();
+  async findAll(page = 1, limit = 20) {
+    const take = Math.max(1, Number(limit));
+    const currentPage = Math.max(1, Number(page));
+
+    const total = await this.prisma.blog.count();
+    const items = await this.prisma.blog.findMany({
+      skip: (currentPage - 1) * take,
+      take,
+      orderBy: { id: 'desc' },
+    });
+
+    return paginate(items, { total, page: currentPage, limit: take });
   }
 
   /**

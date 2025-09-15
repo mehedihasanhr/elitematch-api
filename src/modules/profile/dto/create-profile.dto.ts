@@ -22,10 +22,6 @@ export class CreateProfileDto {
     description: 'Profile avatar URL',
     required: true,
   })
-  @IsString()
-  @IsNotEmpty()
-  avatar: string;
-
   @ApiProperty({
     example: 'https://example.com/video.mp4',
     description: 'Introduction video link',

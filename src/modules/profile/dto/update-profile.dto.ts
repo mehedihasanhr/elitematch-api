@@ -18,6 +18,8 @@ export class UpdateProfileDto {
   occupation?: string;
   @ApiProperty({ example: 3, required: false })
   occupationId?: number;
+  @ApiProperty({ example: 12, required: false })
+  avatarId?: number;
 
   @ApiProperty({ example: '1990-01-01T00:00:00.000Z', required: false })
   dateOfBirth?: string;

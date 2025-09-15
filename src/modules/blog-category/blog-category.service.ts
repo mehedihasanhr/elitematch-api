@@ -3,6 +3,7 @@ import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma, BlogCategory } from '@prisma/client';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { UpdateBlogCategoryDto } from './dto/update-blog-category.dto';
+import { paginate } from 'src/utils/paginate';
 
 /**
  * Shape of a blog_categories row returned from raw SQL.
@@ -28,8 +29,14 @@ export class BlogCategoryService {
   /**
    * List all blog categories
    */
-  async findAll(): Promise<BlogCategory[]> {
-    return this.prisma.blogCategory.findMany({ orderBy: { id: 'asc' } });
+  async findAll() {
+    // default to returning paginated result for future compatibility
+    const total = await this.prisma.blogCategory.count();
+    const items = await this.prisma.blogCategory.findMany({
+      orderBy: { id: 'asc' },
+    });
+
+    return paginate(items, { total, page: 1, limit: total });
   }
 
   /**

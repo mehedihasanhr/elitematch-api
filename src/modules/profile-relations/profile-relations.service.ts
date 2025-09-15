@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { CreateRelationDto } from './dto/create-relation.dto';
 import { UpdateRelationDto } from './dto/update-relation.dto';
+import { paginate } from 'src/utils/paginate';
 
 // Small typed shape for Prisma delegate operations we use here.
 type PrismaCrudDelegate = {
@@ -14,6 +15,7 @@ type PrismaCrudDelegate = {
   findUnique: (args: { where: { id: number } }) => Promise<unknown>;
   update: (args: { where: { id: number }; data: unknown }) => Promise<unknown>;
   delete: (args: { where: { id: number } }) => Promise<unknown>;
+  count: (args?: unknown) => Promise<number>;
 };
 
 @Injectable()
@@ -138,10 +140,27 @@ export class ProfileRelationsService {
    * Retrieve all records for the specified relation model.
    * Returns an array of records.
    */
-  async findAll(model: string): Promise<unknown[]> {
+  async findAll(model: string, page = 1, limit = 20): Promise<unknown> {
     const key = this.ensureSupported(model);
     const delegate = this.getDelegate(key);
-    return await delegate.findMany();
+
+    const take = Math.max(1, Number(limit));
+    const currentPage = Math.max(1, Number(page));
+
+    // use the delegate's count method (present on Prisma model delegates)
+    const total = await delegate.count();
+
+    const items = await delegate.findMany({
+      skip: (currentPage - 1) * take,
+      take,
+      orderBy: { id: 'desc' },
+    });
+
+    return paginate(items, {
+      total,
+      page: currentPage,
+      limit: take,
+    }) as unknown;
   }
 
   /**

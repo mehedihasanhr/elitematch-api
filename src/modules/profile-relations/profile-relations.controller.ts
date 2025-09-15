@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Query,
   ParseIntPipe,
   Post,
   Put,
@@ -16,6 +17,7 @@ import {
   ApiParam,
   ApiResponse,
   ApiTags,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateRelationDto } from './dto/create-relation.dto';
@@ -55,14 +57,20 @@ export class ProfileRelationsController {
 
   @Get(':model')
   @ApiOperation({ summary: 'List relation entries for model' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiParam({
     name: 'model',
     description: 'The relation model name (see supported list)',
     required: true,
   })
   @ApiResponse({ status: 200, description: 'List of records returned' })
-  async findAll(@Param('model') model: string): Promise<any> {
-    return await this.service.findAll(model);
+  async findAll(
+    @Param('model') model: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<any> {
+    return await this.service.findAll(model, page ?? 1, limit ?? 20);
   }
 
   @Get(':model/:id')
