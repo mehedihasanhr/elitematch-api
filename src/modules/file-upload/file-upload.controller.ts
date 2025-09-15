@@ -18,7 +18,7 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-@Controller('file-upload')
+@Controller('uploads')
 export class FileUploadController {
   constructor(private service: FileUploadService) {}
 
@@ -26,8 +26,8 @@ export class FileUploadController {
    * Upload a file.
    * @param file The file to upload.
    */
-  @Post()
-  @ApiTags('file-upload')
+  @Post('/image')
+  @ApiTags('uploads/image')
   @ApiOperation({ summary: 'Upload a file' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
