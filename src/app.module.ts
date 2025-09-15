@@ -9,6 +9,8 @@ import { ProfileModule } from 'src/modules/profile/profile.module';
 import { BlogModule } from 'src/modules/blog/blog.module';
 import { BlogCategoryModule } from 'src/modules/blog-category/blog-category.module';
 import { MailModule } from './cores/modules/mail/mail.module';
+import { CmsModule } from './modules/cms/cms.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { MailModule } from './cores/modules/mail/mail.module';
     BlogModule,
     BlogCategoryModule,
     FileModule,
+    CmsModule,
+    FileUploadModule,
   ],
   // AuthService and AuthController are provided by AuthModule
 })
