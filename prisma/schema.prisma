@@ -79,6 +79,8 @@ model User {
   updatedEducationLevel               EducationLevel[]              @relation("EducationLevelUpdatedBy")
   occupation                          Occupation[]                  @relation("OccupationCreator")
   updatedOccupation                   Occupation[]                  @relation("OccupationUpdatedBy")
+  allergies                           Allergy[]                     @relation("AllergyCreator")
+  updatedAllergies                    Allergy[]                     @relation("AllergyUpdatedBy")
 
   @@map("users")
 }
@@ -208,8 +210,26 @@ model Profile {
   wellnessInterests                   WellnessInterest[]
   socialCircles                       SocialCircle[]
   luxuryAlignment                     LuxuryAlignment[]
+  allergies                           Allergy[]
 
   @@map("profiles")
+}
+
+model Allergy {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  profileId Int?     @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("AllergyCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("AllergyUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("allergies")
 }
 
 model RelationshipStatus {

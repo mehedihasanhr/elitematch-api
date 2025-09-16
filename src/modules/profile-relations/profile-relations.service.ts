@@ -49,6 +49,11 @@ export class ProfileRelationsService {
     'educationLevel',
     'incomeRange',
     'relationshipStatus',
+    'allergy',
+    'culturalFits',
+    'loveLanguage',
+    'preferredDate',
+    'reasonForUsing',
   ]);
 
   private modelNameToPrismaKey(name: string) {
@@ -80,6 +85,11 @@ export class ProfileRelationsService {
       'educationLevel',
       'incomeRange',
       'relationshipStatus',
+      'allergy',
+      'culturalFits',
+      'loveLanguage',
+      'preferredDate',
+      'reasonForUsing',
     ];
 
     const inputKey = canonical(name);

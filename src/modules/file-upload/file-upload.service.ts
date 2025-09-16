@@ -11,6 +11,7 @@ export class FileUploadService {
    */
   async uploadFile(file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file provided');
+
     const savedFile = await this.fileService.processAndSaveFile(file);
     return savedFile;
   }

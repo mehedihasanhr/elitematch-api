@@ -10,15 +10,15 @@ import {
 import { FileUploadService } from './file-upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiTags,
   ApiOperation,
   ApiConsumes,
   ApiBody,
   ApiOkResponse,
   ApiCreatedResponse,
 } from '@nestjs/swagger';
+import { multerOptions } from 'src/cores/config/multer.conf';
 
-@Controller('uploads')
+@Controller('upload')
 export class FileUploadController {
   constructor(private service: FileUploadService) {}
 
@@ -27,7 +27,6 @@ export class FileUploadController {
    * @param file The file to upload.
    */
   @Post('/image')
-  @ApiTags('uploads/image')
   @ApiOperation({ summary: 'Upload a file' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -42,7 +41,7 @@ export class FileUploadController {
     },
   })
   @ApiCreatedResponse({ description: 'File uploaded' })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', multerOptions))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.service.uploadFile(file);
   }
