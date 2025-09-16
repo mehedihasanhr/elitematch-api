@@ -82,6 +82,7 @@ model User {
   updatedOccupation                   Occupation[]                  @relation("OccupationUpdatedBy")
   allergies                           Allergy[]                     @relation("AllergyCreator")
   updatedAllergies                    Allergy[]                     @relation("AllergyUpdatedBy")
+  notes                               Note[]
 
   @@map("users")
 }
@@ -771,4 +772,17 @@ model Subscription {
   plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model Note {
+  id       Int      @id @default(autoincrement())
+  title    String   @db.VarChar(255)
+  content  String   @db.LongText
+  date     DateTime @default(now()) @map("date")
+  publish  DateTime @map("publish_date")
+  isPinned Boolean  @default(false) @map("is_pinned")
+  authorId Int      @map("author_id")
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
 }

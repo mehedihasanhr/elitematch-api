@@ -90,12 +90,14 @@ export class ProfileService {
     const take = Math.max(1, Number(limit));
     const currentPage = Math.max(1, Number(page));
 
-    const total = await this.prisma.profile.count();
-    const items = await this.prisma.profile.findMany({
-      skip: (currentPage - 1) * take,
-      take,
-      orderBy: { id: 'desc' },
-    });
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.profile.findMany({
+        skip: (currentPage - 1) * take,
+        take,
+        orderBy: { id: 'desc' },
+      }),
+      this.prisma.profile.count(),
+    ]);
 
     return paginate(items, { total, page: currentPage, limit: take });
   }
