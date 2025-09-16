@@ -14,6 +14,8 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SubscriptionPlanModule } from './modules/subscription-plan/subscription-plan.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { StripeModule } from './cores/modules/stripe/stripe.module';
+import { UsersModule } from './modules/users/users.module';
+import { MatchMakersModule } from './modules/match-makers/match-makers.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { StripeModule } from './cores/modules/stripe/stripe.module';
     SubscriptionPlanModule,
     SubscriptionModule,
     StripeModule,
+    UsersModule,
+    MatchMakersModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
