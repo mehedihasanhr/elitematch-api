@@ -11,6 +11,9 @@ import { BlogCategoryModule } from 'src/modules/blog-category/blog-category.modu
 import { MailModule } from './cores/modules/mail/mail.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { SubscriptionPlanModule } from './modules/subscription-plan/subscription-plan.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { StripeModule } from './cores/modules/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -29,7 +32,11 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
     FileModule,
     CmsModule,
     FileUploadModule,
+    SubscriptionPlanModule,
+    SubscriptionModule,
+    StripeModule,
   ],
+  providers: [],
   // AuthService and AuthController are provided by AuthModule
 })
 export class AppModule {}

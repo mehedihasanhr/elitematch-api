@@ -21,6 +21,7 @@ model User {
   isVerified                          Boolean                       @default(false) @map("is_verified")
   roleId                              Int?                          @map("role_id")
   role                                Role?                         @relation(fields: [roleId], references: [id])
+  matchMaker                          MatchMaker?
   createdAt                           DateTime                      @default(now()) @map("created_at")
   updatedAt                           DateTime                      @updatedAt @map("updated_at")
   createdAgePreferences               AgePreference[]               @relation("AgePreferenceCreator")
@@ -118,6 +119,17 @@ model FileUsage {
   @@index([fileId], name: "idx_file_usage_file_id")
   @@index([modelId], name: "idx_file_usage_model_id")
   @@map("file_usage")
+}
+
+model MatchMaker {
+  id              Int     @id @default(autoincrement())
+  userId          Int     @unique @map("user_id")
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experienceYears Int     @map("experience_years")
+  active          Boolean @default(true)
+
+  @@index([userId], name: "idx_match_maker_user_id")
+  @@map("match_makers")
 }
 
 model Role {
