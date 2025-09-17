@@ -17,6 +17,8 @@ import { StripeModule } from './cores/modules/stripe/stripe.module';
 import { UsersModule } from './modules/users/users.module';
 import { MatchMakersModule } from './modules/match-makers/match-makers.module';
 import { NoteModule } from './modules/note/note.module';
+import { MatchCalculatorModule } from './modules/match-calculator/match-calculator.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { NoteModule } from './modules/note/note.module';
     UsersModule,
     MatchMakersModule,
     NoteModule,
+    MatchCalculatorModule,
+    CommentModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule

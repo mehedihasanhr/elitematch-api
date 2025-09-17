@@ -101,8 +101,9 @@ model File {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   uploadedBy   Int?
-  user         User[]
-  profile      Profile[]
+  users        User[]
+  profiles     Profile[]
+  blogs        Blog[]
 
   @@index([originalName], name: "idx_file_original_name")
   @@index([hash], name: "idx_file_hash")
@@ -674,21 +675,22 @@ model Ethnicity {
 
 // Blog management
 model Blog {
-  id          Int           @id @default(autoincrement())
-  title       String        @db.VarChar(255)
-  slug        String        @unique @db.VarChar(255)
-  content     String        @db.Text
-  authorId    Int           @map("author_id")
-  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  isPublished Boolean       @default(false) @map("is_published")
-  publishedAt DateTime?     @map("published_at")
-  coverImage  String?       @map("cover_image") @db.VarChar(255)
-  comments    Comment[]     @relation("BlogToComment")
-  blogTags    BlogTag[]
-  categoryId  Int?          @map("category_id")
-  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  id           Int           @id @default(autoincrement())
+  title        String        @db.VarChar(255)
+  slug         String        @unique @db.VarChar(255)
+  content      String        @db.Text
+  authorId     Int           @map("author_id")
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  isPublished  Boolean       @default(false) @map("is_published")
+  publishedAt  DateTime?     @map("published_at")
+  coverImageId Int           @map("cover_image_id")
+  coverImage   File          @relation(fields: [coverImageId], references: [id])
+  comments     Comment[]     @relation("BlogToComment")
+  blogTags     BlogTag[]
+  categoryId   Int?          @map("category_id")
+  category     BlogCategory? @relation(fields: [categoryId], references: [id])
 }
 
 model BlogCategory {

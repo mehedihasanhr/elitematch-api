@@ -47,7 +47,14 @@ export class ProfileController {
   @UseInterceptors(FileInterceptor('avatar', multerOptions))
   @ApiOperation({ summary: 'Create profile' })
   @ApiBody({ type: CreateProfileDto })
-  @ApiResponse({ status: 201, description: 'Profile created' })
+  @ApiResponse({
+    status: 201,
+    description: 'Profile created successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid data',
+  })
   create(
     @Body() dto: CreateProfileDto,
     @UploadedFile() file: Express.Multer.File,
@@ -57,66 +64,80 @@ export class ProfileController {
 
   @Get()
   @ApiOperation({ summary: 'List profiles' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'List of profiles' })
-  /**
-   * HTTP GET /profiles
-   *
-   * Return a list of all profiles. Consider adding query parameters for
-   * pagination and filtering in future iterations.
-   *
-   * @returns Array of profile records.
-   */
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of profiles returned successfully',
+  })
   findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
     return this.service.findAll(page ?? 1, limit ?? 20);
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', type: Number })
   @ApiOperation({ summary: 'Get profile by id' })
-  /**
-   * HTTP GET /profiles/:id
-   *
-   * Retrieve a single profile by its id. Returns 404 when not found.
-   *
-   * @param id - Numeric identifier parsed by ParseIntPipe.
-   * @returns The requested profile record.
-   */
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Profile ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile not found',
+  })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
   }
 
   @Put(':id')
-  @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ type: UpdateProfileDto })
   @ApiOperation({ summary: 'Update profile' })
-  /**
-   * HTTP PUT /profiles/:id
-   *
-   * Update an existing profile. Only provided fields in the body will be
-   * updated. The service layer performs a partial update.
-   *
-   * @param id - Numeric identifier of the profile to update.
-   * @param dto - UpdateProfileDto with fields to modify.
-   * @returns The updated profile record.
-   */
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Profile ID',
+  })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile not found',
+  })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProfileDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id', type: Number })
   @ApiOperation({ summary: 'Delete profile' })
-  /**
-   * HTTP DELETE /profiles/:id
-   *
-   * Permanently remove a profile. Use with caution — consider soft-delete if
-   * a recoverable or auditable delete is required.
-   *
-   * @param id - Numeric identifier of the profile to delete.
-   * @returns The deleted profile record.
-   */
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Profile ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile deleted successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile not found',
+  })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }

@@ -16,9 +16,6 @@ export class CreateBlogDto {
   @ApiProperty({ example: false })
   isPublished?: boolean;
 
-  @ApiProperty({ example: 'cover.jpg', required: false })
-  coverImage?: string;
-
   @ApiProperty({ example: 1, required: false })
   categoryId?: number;
 }

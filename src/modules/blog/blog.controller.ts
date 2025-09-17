@@ -9,6 +9,8 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,11 +19,14 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from '../../cores/config/multer.conf';
 
 @ApiTags('blogs')
 @Controller('blogs')
@@ -33,11 +38,33 @@ export class BlogController {
    */
   @UseGuards(JwtAuthGuard)
   @Post()
+  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
   @ApiOperation({ summary: 'Create blog' })
-  @ApiBody({ type: CreateBlogDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Blog Title' },
+        slug: { type: 'string', example: 'blog-slug' },
+        content: { type: 'string', example: 'Blog content...' },
+        authorId: { type: 'number', example: 1 },
+        isPublished: { type: 'boolean', example: true },
+        categoryId: { type: 'number', example: 1 },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Cover image file',
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 201, description: 'Blog created' })
-  create(@Body() dto: CreateBlogDto) {
-    return this.service.create(dto);
+  create(
+    @Body() dto: CreateBlogDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.service.create(dto, file);
   }
 
   @Get()
@@ -57,11 +84,35 @@ export class BlogController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ type: UpdateBlogDto })
   @ApiOperation({ summary: 'Update blog' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBlogDto) {
-    return this.service.update(id, dto);
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Updated Blog Title' },
+        slug: { type: 'string', example: 'updated-blog-slug' },
+        content: { type: 'string', example: 'Updated blog content...' },
+        isPublished: { type: 'boolean', example: true },
+        categoryId: { type: 'number', example: 1 },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Cover image file (optional)',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Blog updated' })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBlogDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.service.update(id, dto, file);
   }
 
   @Delete(':id')

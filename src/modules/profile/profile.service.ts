@@ -136,7 +136,6 @@ export class ProfileService {
       const savedFile = await this.fileService.processAndSaveFile(file);
       newFileId = savedFile.id;
     }
-    if (data.userId !== undefined) payload.userId = data.userId;
     if (newFileId !== null) {
       payload.avatarId = newFileId;
     } else if (data.avatarId !== undefined) {

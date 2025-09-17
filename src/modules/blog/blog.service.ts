@@ -1,34 +1,63 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
+import { FileService } from 'src/cores/modules/file/file.service';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { paginate } from 'src/utils/paginate';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { paginate } from 'src/utils/paginate';
 
 @Injectable()
 export class BlogService {
   /**
    * @param prisma - PrismaService instance for DB operations
    */
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fileService: FileService,
+  ) {}
 
   /**
    * Create a new blog post.
    * @param data - DTO containing blog fields
    * @returns The created blog record
    */
-  async create(data: CreateBlogDto) {
+  async create(data: CreateBlogDto, file?: Express.Multer.File) {
+    let coverId: number | null = null;
+
+    if (file) {
+      const savedFile = await this.fileService.processAndSaveFile(file);
+      coverId = savedFile.id;
+    }
+
     const payload: Prisma.BlogUncheckedCreateInput = {
       title: data.title,
       slug: data.slug,
       content: data.content,
       authorId: data.authorId,
       isPublished: data.isPublished ?? false,
-      coverImage: data.coverImage ?? null,
       categoryId: data.categoryId ?? null,
+      coverImageId: coverId,
     } as Prisma.BlogUncheckedCreateInput;
 
-    return this.prisma.blog.create({ data: payload });
+    const blog = await this.prisma.blog.create({ data: payload });
+
+    if (coverId) {
+      // create file usage record
+      await this.prisma.fileUsage.create({
+        data: {
+          fileId: coverId,
+          model: 'blog',
+          modelId: blog.id,
+        },
+      });
+    }
+
+    return {
+      data: blog,
+      message: 'Blog created successfully',
+      status: 'success',
+      statusCode: 201,
+    };
   }
 
   /**
@@ -67,17 +96,54 @@ export class BlogService {
    * @param data - update DTO
    * @returns updated blog
    */
-  async update(id: number, data: UpdateBlogDto) {
+  async update(id: number, data: UpdateBlogDto, file?: Express.Multer.File) {
+    const existing = await this.prisma.blog.findUnique({ where: { id } });
+
+    if (!existing) throw new NotFoundException('Blog not found');
+    let coverId: number | null = existing.coverImageId;
+
+    if (file) {
+      const savedFile = await this.fileService.processAndSaveFile(file);
+      coverId = savedFile.id;
+
+      if (existing.coverImageId) {
+        await this.prisma.fileUsage.updateMany({
+          where: { model: 'blog', modelId: id, fileId: existing.coverImageId },
+          data: { fileId: savedFile.id },
+        });
+      } else {
+        await this.prisma.fileUsage.create({
+          data: {
+            fileId: savedFile.id,
+            model: 'blog',
+            modelId: id,
+          },
+        });
+      }
+    }
+
     const payload: Prisma.BlogUncheckedUpdateInput =
       {} as Prisma.BlogUncheckedUpdateInput;
     if (data.title !== undefined) payload.title = data.title;
     if (data.slug !== undefined) payload.slug = data.slug;
     if (data.content !== undefined) payload.content = data.content;
     if (data.isPublished !== undefined) payload.isPublished = data.isPublished;
-    if (data.coverImage !== undefined) payload.coverImage = data.coverImage;
     if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
 
-    return this.prisma.blog.update({ where: { id }, data: payload });
+    const blog = await this.prisma.blog.update({
+      where: { id },
+      data: {
+        ...payload,
+        ...(coverId !== null ? { coverImageId: coverId } : {}),
+      },
+    });
+
+    return {
+      data: blog,
+      message: 'Blog updated successfully',
+      status: 'success',
+      statusCode: 200,
+    };
   }
 
   /**
@@ -86,6 +152,16 @@ export class BlogService {
    * @returns deleted record
    */
   async remove(id: number) {
-    return this.prisma.blog.delete({ where: { id } });
+    const existing = await this.prisma.blog.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Blog not found');
+    // remove file usese  record
+    await this.prisma.fileUsage.deleteMany({
+      where: { model: 'blog', modelId: id, fileId: existing.coverImageId },
+    });
+
+    const deleted = await this.prisma.blog.delete({ where: { id } });
+
+    await this.fileService.removeExistingFile(existing.coverImageId);
+    return deleted;
   }
 }

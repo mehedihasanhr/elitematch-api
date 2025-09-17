@@ -1,10 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
   IsOptional,
   IsInt,
   IsDateString,
+  IsArray,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateProfileDto {
@@ -17,37 +19,23 @@ export class CreateProfileDto {
   @IsNotEmpty()
   userId: number;
 
-  @ApiProperty({
-    example: 'https://cdn.example.com/avatar.jpg',
-    description: 'Profile avatar URL',
-    required: true,
-  })
-  @ApiProperty({
-    example: 'https://example.com/video.mp4',
-    description: 'Introduction video link',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  introductionVideoLink: string;
-
-  @ApiProperty({
-    example: 'Software Engineer',
-    description: 'User occupation',
-    required: true,
-  })
-  @IsOptional()
-  @IsString()
-  occupation?: string;
-
-  @ApiProperty({
-    example: 3,
-    description: 'Occupation id (preferred)',
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Avatar file ID',
     required: false,
   })
   @IsOptional()
   @IsInt()
-  occupationId?: number;
+  avatarId?: number;
+
+  @ApiPropertyOptional({
+    example: 'https://example.com/video.mp4',
+    description: 'Introduction video link',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  introductionVideoLink?: string;
 
   @ApiProperty({
     example: '1990-01-01T00:00:00.000Z',
@@ -58,192 +46,418 @@ export class CreateProfileDto {
   @IsNotEmpty()
   dateOfBirth: string;
 
-  @ApiProperty({
-    example: "Bachelor's Degree",
-    description: 'Education level',
-    required: true,
+  @ApiPropertyOptional({
+    example: 3,
+    description: 'Occupation ID reference',
+    required: false,
   })
   @IsOptional()
-  @IsString()
-  educationLevel?: string;
+  @IsInt()
+  occupationId?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 2,
-    description: 'Education level id (preferred)',
+    description: 'Education level ID reference',
     required: false,
   })
   @IsOptional()
   @IsInt()
   educationLevelId?: number;
 
-  @ApiProperty({
-    example: '$50,000 - $100,000',
-    description: 'Income range',
-    required: true,
-  })
-  @IsOptional()
-  @IsString()
-  incomeRange?: string;
-
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 4,
-    description: 'Income range id (preferred)',
+    description: 'Income range ID reference',
     required: false,
   })
   @IsOptional()
   @IsInt()
   incomeRangeId?: number;
 
-  @ApiProperty({
-    example: 'Single',
-    description: 'Relationship status',
-    required: true,
-  })
-  @IsOptional()
-  @IsString()
-  relationshipStatus?: string;
-
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 1,
-    description: 'Relationship status id (preferred)',
+    description: 'Relationship status ID reference',
     required: false,
   })
   @IsOptional()
   @IsInt()
   relationshipStatusId?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Male',
     description: 'Gender',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  gender: string;
+  gender?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'A short bio about the user',
     description: 'Profile bio',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  bio: string;
+  bio?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Lagos',
     description: 'City',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  city: string;
+  city?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Lagos State',
     description: 'State',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  state: string;
+  state?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '100001',
     description: 'Zip code',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  zipCode: string;
+  zipCode?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Nigeria',
     description: 'Country',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  country: string;
+  country?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '5\'10"',
     description: 'Height',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  height: string;
+  height?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '70kg',
     description: 'Weight',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  weight: string;
+  weight?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 0,
     description: 'Number of children',
     required: false,
+    default: 0,
   })
   @IsOptional()
   @IsInt()
   noOfChildren?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Looking for someone who shares my values',
     description: 'Specific partner preferences',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  specificPartnerPreferences: string;
+  specificPartnerPreferences?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Help me find the right match',
     description: 'Expectations from matchmaker',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  expectationsFromMatchmaker: string;
+  expectationsFromMatchmaker?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'What should I know about finding love?',
     description: 'Question for matchmaker',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  questionForMatchmaker: string;
+  questionForMatchmaker?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Previous relationships taught me...',
     description: 'Past relationship experience',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  pastRelationshipExperience: string;
+  pastRelationshipExperience?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Communication is key',
     description: 'Lessons learned from past relationships',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  lessonsLearnedFromPastRelationships: string;
+  lessonsLearnedFromPastRelationships?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Avoid rushing into commitments',
     description: 'Patterns to avoid in relationships',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  patternsToAvoidInRelationships: string;
+  patternsToAvoidInRelationships?: string;
+
+  // Many-to-many relationship arrays
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of ethnicity IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  ethnicities?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of religion IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  religions?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3, 5],
+    description: 'Array of partner quality IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  partnerQualities?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4],
+    description: 'Array of background preference IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  backgroundPreferences?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of physical attribute IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  physicalAttributes?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of age preference IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  agePreferences?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3],
+    description: 'Array of lifestyle IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  lifeStyle?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4, 6],
+    description: 'Array of core value IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  coreValues?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of cultural/religious preference IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  culturalReligiousPreferences?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3, 5],
+    description: 'Array of social activity IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  socialActivities?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4],
+    description: 'Array of relocation IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  relocation?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of relationship expectation IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  relationshipExpectations?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of ideal relationship IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  idealRelationships?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3],
+    description: 'Array of relationship timeline IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  relationshipTimeline?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4],
+    description: 'Array of family aspiration IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  familyAspirations?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of personality trait IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  personalityTraits?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3, 5],
+    description: 'Array of personal interest IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  personalInterests?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4],
+    description: 'Array of intellectual interest IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  intellectualInterests?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of wellness interest IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  wellnessInterests?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 3],
+    description: 'Array of social circle IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  socialCircles?: number[];
+
+  @ApiPropertyOptional({
+    example: [2, 4],
+    description: 'Array of luxury alignment IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  luxuryAlignment?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of allergy IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  allergies?: number[];
 }
