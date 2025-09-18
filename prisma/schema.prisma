@@ -920,7 +920,7 @@ enum GoogleScriptType {
 model GoolgeScript {
   id        Int              @id @default(autoincrement())
   title     String           @db.VarChar(255)
-  type      GoogleScriptType @map("type")
+  gtype     GoogleScriptType @map("gtype")
   script    String           @db.LongText
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")

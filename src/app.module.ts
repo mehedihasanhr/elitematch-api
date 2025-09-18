@@ -22,6 +22,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { BlogSeoModule } from './modules/blog-seo/blog-seo.module';
 import { NewsletterSubscriberModule } from './modules/newsletter-subscriber/newsletter-subscriber.module';
 import { SiteMetadataModule } from './modules/site-metadata/site-metadata.module';
+import { GoogleScriptModule } from './modules/google-script/google-script.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { SiteMetadataModule } from './modules/site-metadata/site-metadata.module
     BlogSeoModule,
     NewsletterSubscriberModule,
     SiteMetadataModule,
+    GoogleScriptModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
