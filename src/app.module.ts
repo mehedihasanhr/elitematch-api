@@ -19,6 +19,9 @@ import { MatchMakersModule } from './modules/match-makers/match-makers.module';
 import { NoteModule } from './modules/note/note.module';
 import { MatchCalculatorModule } from './modules/match-calculator/match-calculator.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { BlogSeoModule } from './modules/blog-seo/blog-seo.module';
+import { NewsletterSubscriberModule } from './modules/newsletter-subscriber/newsletter-subscriber.module';
+import { SiteMetadataModule } from './modules/site-metadata/site-metadata.module';
 
 @Module({
   imports: [
@@ -45,6 +48,9 @@ import { CommentModule } from './modules/comment/comment.module';
     NoteModule,
     MatchCalculatorModule,
     CommentModule,
+    BlogSeoModule,
+    NewsletterSubscriberModule,
+    SiteMetadataModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
