@@ -23,6 +23,7 @@ import { BlogSeoModule } from './modules/blog-seo/blog-seo.module';
 import { NewsletterSubscriberModule } from './modules/newsletter-subscriber/newsletter-subscriber.module';
 import { SiteMetadataModule } from './modules/site-metadata/site-metadata.module';
 import { GoogleScriptModule } from './modules/google-script/google-script.module';
+import { QuickLinkModule } from './modules/quick-link/quick-link.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { GoogleScriptModule } from './modules/google-script/google-script.module
     NewsletterSubscriberModule,
     SiteMetadataModule,
     GoogleScriptModule,
+    QuickLinkModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
