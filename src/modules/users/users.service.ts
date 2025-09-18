@@ -15,6 +15,11 @@ export class UsersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const where: Record<string, unknown> = {};
+
+    where['firstName'] = { contains: query.search };
+    where['lastName'] = { contains: query.search };
+
     const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         skip,
