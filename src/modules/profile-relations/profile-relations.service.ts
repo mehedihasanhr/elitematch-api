@@ -52,7 +52,7 @@ export class ProfileRelationsService {
     'allergy',
     'culturalFits',
     'loveLanguage',
-    'preferedDates',
+    'preferedDate',
     'reasonForUsing',
     'culturalFit',
   ]);
@@ -89,7 +89,7 @@ export class ProfileRelationsService {
       'allergy',
       'culturalFit',
       'loveLanguage',
-      'preferedDates',
+      'preferedDate',
       'reasonsForUsing',
     ];
 
