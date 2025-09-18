@@ -4,10 +4,52 @@ import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { FileService } from '../../cores/modules/file/file.service';
+import { FileService } from 'src/cores/modules/file/file.service';
 
 @Injectable()
 export class ProfileService {
+  private baseInclude = {
+    user: {
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
+    },
+    avatars: true,
+    occupation: true,
+    educationLevel: true,
+    incomeRange: true,
+    relationshipStatus: true,
+
+    ethnicities: true,
+    religions: true,
+    partnerQualities: true,
+    backgroundPreferences: true,
+    physicalAttributes: true,
+    agePreferences: true,
+    lifeStyle: true,
+    coreValues: true,
+    socialActivities: true,
+    relocation: true,
+    relationshipExpectations: true,
+    idealRelationships: true,
+    relationshipTimeline: true,
+    familyAspirations: true,
+    personalityTraits: true,
+    personalInterests: true,
+    intellectualInterests: true,
+    wellnessInterests: true,
+    socialCircles: true,
+    luxuryAlignment: true,
+    allergies: true,
+    culturalFits: true,
+    loveLanguage: true,
+    preferedDates: true,
+    reasonsForUsing: true,
+  };
+
   /**
    * ProfileService constructor
    * @param prisma - PrismaService instance used to access the database.
@@ -104,6 +146,7 @@ export class ProfileService {
         skip: (currentPage - 1) * take,
         take,
         orderBy: { id: 'desc' },
+        include: this.baseInclude,
       }),
       this.prisma.profile.count(),
     ]);
@@ -121,7 +164,10 @@ export class ProfileService {
    * @throws NotFoundException when no profile matches the given id.
    */
   async findOne(id: number) {
-    const item = await this.prisma.profile.findUnique({ where: { id } });
+    const item = await this.prisma.profile.findUnique({
+      where: { id },
+      include: this.baseInclude,
+    });
     if (!item) throw new NotFoundException('Profile not found');
     return item;
   }
