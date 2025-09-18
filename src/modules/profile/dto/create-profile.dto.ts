@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -15,6 +16,7 @@ export class CreateProfileDto {
     description: 'User ID owning the profile',
     required: true,
   })
+  @Type(() => Number)
   @IsInt()
   @IsNotEmpty()
   userId: number;
