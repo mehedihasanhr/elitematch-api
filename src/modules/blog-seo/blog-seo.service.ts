@@ -10,7 +10,10 @@ export class BlogSeoService {
 
   async create(createBlogSeoDto: CreateBlogSeoDto) {
     const seo = await this.prisma.blogSEO.create({
-      data: createBlogSeoDto,
+      data: {
+        ...createBlogSeoDto,
+        metadata: createBlogSeoDto.metadata || {},
+      },
     });
 
     return {

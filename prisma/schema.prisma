@@ -96,22 +96,24 @@ model User {
 }
 
 model File {
-  id           Int       @id @default(autoincrement())
-  originalName String    @map("original_name")
+  id           Int            @id @default(autoincrement())
+  originalName String         @map("original_name")
   mimeType     String
   fileSize     Int
   width        Int
   height       Int
-  hash         String    @unique
+  hash         String         @unique
   url          String
   path         String
   extension    String
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
   uploadedBy   Int?
   users        User[]
   profiles     Profile[]
   blogs        Blog[]
+  logo         SiteMetadata[] @relation("LogoFile")
+  favicon      SiteMetadata[] @relation("FaviconFile")
 
   @@index([originalName], name: "idx_file_original_name")
   @@index([hash], name: "idx_file_hash")
@@ -184,10 +186,9 @@ model Profile {
   id                                  Int                           @id @default(autoincrement())
   userId                              Int                           @unique() @map("user_id")
   user                                User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  avatarId                            Int?                          @map("avatar_id")
-  avatar                              File?                         @relation(fields: [avatarId], references: [id])
+  avatars                             File[]
   introductionVideoLink               String?                       @map("introduction_video_link") @db.VarChar(255)
-  dateOfBirth                         DateTime                      @map("date_of_birth")
+  dateOfBirth                         DateTime?                     @map("date_of_birth")
   occupationId                        Int?                          @map("occupation_id")
   occupation                          Occupation?                   @relation(fields: [occupationId], references: [id], onDelete: Cascade)
   educationLevelId                    Int?                          @map("education_level_id")
@@ -769,6 +770,24 @@ model Blog {
   blogTags     BlogTag[]
   categoryId   Int?          @map("category_id")
   category     BlogCategory? @relation(fields: [categoryId], references: [id])
+  seo          BlogSEO?
+
+  @@map("blogs")
+}
+
+model BlogSEO {
+  id          Int      @id @default(autoincrement())
+  blogId      Int      @unique @map("blog_id")
+  title       String   @db.VarChar(255)
+  description String   @db.VarChar(500)
+  keywords    String   @db.VarChar(255)
+  metadata    Json?    @db.Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@map("blog_seo")
 }
 
 model BlogCategory {
@@ -865,4 +884,56 @@ model Note {
   author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("notes")
+}
+
+model NewsletterSubscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("newsletter_subscribers")
+}
+
+model SiteMetadata {
+  id           Int     @id @default(autoincrement())
+  title        String  @db.VarChar(255)
+  organization String  @db.VarChar(255)
+  description  String? @db.Text
+  logoId       Int?    @map("logo_id")
+  faviconId    Int?    @map("favicon_id")
+
+  logo    File? @relation("LogoFile", fields: [logoId], references: [id])
+  favicon File? @relation("FaviconFile", fields: [faviconId], references: [id])
+
+  @@map("site_metadata")
+}
+
+enum GoogleScriptType {
+  ANALYTICS
+  TAG_MANAGER
+  ADSENSE
+  OTHER
+}
+
+model GoolgeScript {
+  id        Int              @id @default(autoincrement())
+  title     String           @db.VarChar(255)
+  type      GoogleScriptType @map("type")
+  script    String           @db.LongText
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  @@map("google_scripts")
+}
+
+model QuickLink {
+  id        Int      @id @default(autoincrement())
+  label     String   @db.VarChar(100)
+  link      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("quick_links")
 }

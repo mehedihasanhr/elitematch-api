@@ -146,9 +146,9 @@ export class ProfileService {
       newFileId = savedFile.id;
     }
     if (newFileId !== null) {
-      payload.avatarId = newFileId;
+      // payload.avatarId = newFileId;
     } else if (data.avatarId !== undefined) {
-      payload.avatarId = data.avatarId;
+      // payload.avatarId = data.avatarId;
     }
     if (data.occupationId !== undefined)
       payload.occupationId = data.occupationId;
