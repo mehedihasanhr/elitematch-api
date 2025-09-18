@@ -117,7 +117,82 @@ export class ProfileService {
         data.lessonsLearnedFromPastRelationships ?? undefined,
       patternsToAvoidInRelationships:
         data.patternsToAvoidInRelationships ?? undefined,
-    } as Prisma.ProfileUncheckedCreateInput;
+      ethnicities: data.ethnicities
+        ? { connect: data.ethnicities.map((id) => ({ id })) }
+        : undefined,
+      religions: data.religions
+        ? { connect: data.religions.map((id) => ({ id })) }
+        : undefined,
+      partnerQualities: data.partnerQualities
+        ? { connect: data.partnerQualities.map((id) => ({ id })) }
+        : undefined,
+      backgroundPreferences: data.backgroundPreferences
+        ? { connect: data.backgroundPreferences.map((id) => ({ id })) }
+        : undefined,
+      physicalAttributes: data.physicalAttributes
+        ? { connect: data.physicalAttributes.map((id) => ({ id })) }
+        : undefined,
+      agePreferences: data.agePreferences
+        ? { connect: data.agePreferences.map((id) => ({ id })) }
+        : undefined,
+      lifeStyle: data.lifeStyle
+        ? { connect: data.lifeStyle.map((id) => ({ id })) }
+        : undefined,
+      coreValues: data.coreValues
+        ? { connect: data.coreValues.map((id) => ({ id })) }
+        : undefined,
+      socialActivities: data.socialActivities
+        ? { connect: data.socialActivities.map((id) => ({ id })) }
+        : undefined,
+      relocation: data.relocation
+        ? { connect: data.relocation.map((id) => ({ id })) }
+        : undefined,
+      relationshipExpectations: data.relationshipExpectations
+        ? { connect: data.relationshipExpectations.map((id) => ({ id })) }
+        : undefined,
+      idealRelationships: data.idealRelationships
+        ? { connect: data.idealRelationships.map((id) => ({ id })) }
+        : undefined,
+      relationshipTimeline: data.relationshipTimeline
+        ? { connect: data.relationshipTimeline.map((id) => ({ id })) }
+        : undefined,
+      familyAspirations: data.familyAspirations
+        ? { connect: data.familyAspirations.map((id) => ({ id })) }
+        : undefined,
+      personalityTraits: data.personalityTraits
+        ? { connect: data.personalityTraits.map((id) => ({ id })) }
+        : undefined,
+      personalInterests: data.personalInterests
+        ? { connect: data.personalInterests.map((id) => ({ id })) }
+        : undefined,
+      intellectualInterests: data.intellectualInterests
+        ? { connect: data.intellectualInterests.map((id) => ({ id })) }
+        : undefined,
+      wellnessInterests: data.wellnessInterests
+        ? { connect: data.wellnessInterests.map((id) => ({ id })) }
+        : undefined,
+      socialCircles: data.socialCircles
+        ? { connect: data.socialCircles.map((id) => ({ id })) }
+        : undefined,
+      luxuryAlignment: data.luxuryAlignment
+        ? { connect: data.luxuryAlignment.map((id) => ({ id })) }
+        : undefined,
+      allergies: data.allergies
+        ? { connect: data.allergies.map((id) => ({ id })) }
+        : undefined,
+      culturalFits: data.culturalFits
+        ? { connect: data.culturalFits.map((id) => ({ id })) }
+        : undefined,
+      loveLanguage: data.loveLanguage
+        ? { connect: data.loveLanguage.map((id) => ({ id })) }
+        : undefined,
+      preferedDates: data.preferedDates
+        ? { connect: data.preferedDates.map((id) => ({ id })) }
+        : undefined,
+      reasonsForUsing: data.reasonsForUsing
+        ? { connect: data.reasonsForUsing.map((id) => ({ id })) }
+        : undefined,
+    };
 
     const profile = await this.prisma.profile.create({ data: payload });
 
