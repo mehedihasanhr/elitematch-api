@@ -1,13 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsInt,
-  IsDateString,
   IsArray,
+  IsDateString,
+  IsInt,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateProfileDto {
@@ -16,7 +16,7 @@ export class CreateProfileDto {
     description: 'User ID owning the profile',
     required: true,
   })
-  @Type(() => Number)
+  @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   @IsNotEmpty()
   userId: number;
@@ -27,6 +27,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
   @IsInt()
   avatarId?: number;
 
@@ -54,6 +55,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
   @IsInt()
   occupationId?: number;
 
@@ -63,6 +65,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
   @IsInt()
   educationLevelId?: number;
 
@@ -72,6 +75,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
   @IsInt()
   incomeRangeId?: number;
 
@@ -81,6 +85,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
   @IsInt()
   relationshipStatusId?: number;
 
@@ -163,6 +168,7 @@ export class CreateProfileDto {
     default: 0,
   })
   @IsOptional()
+  @Transform(({ value }) => (value ? parseInt(value, 10) : 0))
   @IsInt()
   noOfChildren?: number;
 
@@ -228,6 +234,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   ethnicities?: number[];
@@ -239,6 +252,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   religions?: number[];
@@ -250,6 +270,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   partnerQualities?: number[];
@@ -261,6 +288,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   backgroundPreferences?: number[];
@@ -272,6 +306,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   physicalAttributes?: number[];
@@ -283,6 +324,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   agePreferences?: number[];
@@ -294,6 +342,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   lifeStyle?: number[];
@@ -305,6 +360,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   coreValues?: number[];
@@ -316,6 +378,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   culturalReligiousPreferences?: number[];
@@ -327,6 +396,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   socialActivities?: number[];
@@ -338,6 +414,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   relocation?: number[];
@@ -349,6 +432,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   relationshipExpectations?: number[];
@@ -360,6 +450,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   idealRelationships?: number[];
@@ -371,6 +468,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   relationshipTimeline?: number[];
@@ -382,6 +486,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   familyAspirations?: number[];
@@ -393,6 +504,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   personalityTraits?: number[];
@@ -404,6 +522,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   personalInterests?: number[];
@@ -415,6 +540,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   intellectualInterests?: number[];
@@ -426,6 +558,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   wellnessInterests?: number[];
@@ -437,6 +576,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   socialCircles?: number[];
@@ -448,6 +594,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   luxuryAlignment?: number[];
@@ -459,6 +612,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   allergies?: number[];
@@ -470,6 +630,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   culturalFits?: number[];
@@ -481,6 +648,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   reasonsForUsing?: number[];
@@ -492,6 +666,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   preferedDates?: number[];
@@ -503,6 +684,13 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((v) => parseInt(v, 10))
+      : value
+        ? [parseInt(value, 10)]
+        : [],
+  )
   @IsArray()
   @IsNumber({}, { each: true })
   loveLanguage?: number[];
