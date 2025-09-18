@@ -87,8 +87,8 @@ model User {
   updateCulturalFit                   CulturalFit[]                 @relation("CulturalUpdatedBy")
   reasonForUsing                      ReasonForUsing[]              @relation("ResonForUsingCreator")
   updateReasonForUsing                ReasonForUsing[]              @relation("ReasonForUsingUpdatedBy")
-  referedDate                         ReferedDate[]                 @relation("ReferedDateCreator")
-  updateReferedDate                   ReferedDate[]                 @relation("ReferedDateUpdatedBy")
+  preferedDate                        PreferedDate[]                @relation("ReferedDateCreator")
+  updateReferedDate                   PreferedDate[]                @relation("ReferedDateUpdatedBy")
   loveLanguage                        LoveLanguage[]                @relation("LoveLanguageCreator")
   updateLoveLanguage                  LoveLanguage[]                @relation("LoveLanguageUpdatedBy")
 
@@ -236,7 +236,7 @@ model Profile {
   allergies                           Allergy[]
   culturalFits                        CulturalFit[]
   reasonsForUsing                     ReasonForUsing[]
-  preferedDates                       ReferedDate[]
+  preferedDates                       PreferedDate[]
   loveLanguage                        LoveLanguage[]
 
   @@map("profiles")
@@ -259,7 +259,7 @@ model LoveLanguage {
   @@map("love-languages")
 }
 
-model ReferedDate {
+model PreferedDate {
   id   Int    @id @default(autoincrement())
   name String @db.VarChar(255)
 
@@ -273,7 +273,7 @@ model ReferedDate {
   Profile   Profile? @relation(fields: [profileId], references: [id])
   profileId Int?
 
-  @@map("refered_dates")
+  @@map("prefered_dates")
 }
 
 model ReasonForUsing {
