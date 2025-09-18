@@ -471,4 +471,37 @@ export class CreateProfileDto {
   @IsArray()
   @IsNumber({}, { each: true })
   culturalFits?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of reasons for using IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  reasonsForUsing?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of Love Language IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  preferedDates?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of Love Language IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  loveLanguage?: number[];
 }

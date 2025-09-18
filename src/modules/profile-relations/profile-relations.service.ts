@@ -92,6 +92,9 @@ export class ProfileRelationsService {
       'preferredDate',
       'reasonForUsing',
       'culturalFit',
+      'loveLanguage',
+      'preferedDates',
+      'reasonsForUsing',
     ];
 
     const inputKey = canonical(name);

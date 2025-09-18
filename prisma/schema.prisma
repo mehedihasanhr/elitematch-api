@@ -85,6 +85,12 @@ model User {
   notes                               Note[]
   culturalFit                         CulturalFit[]                 @relation("CulturalCreator")
   updateCulturalFit                   CulturalFit[]                 @relation("CulturalUpdatedBy")
+  reasonForUsing                      ReasonForUsing[]              @relation("ResonForUsingCreator")
+  updateReasonForUsing                ReasonForUsing[]              @relation("ReasonForUsingUpdatedBy")
+  referedDate                         ReferedDate[]                 @relation("ReferedDateCreator")
+  updateReferedDate                   ReferedDate[]                 @relation("ReferedDateUpdatedBy")
+  loveLanguage                        LoveLanguage[]                @relation("LoveLanguageCreator")
+  updateLoveLanguage                  LoveLanguage[]                @relation("LoveLanguageUpdatedBy")
 
   @@map("users")
 }
@@ -228,8 +234,62 @@ model Profile {
   luxuryAlignment                     LuxuryAlignment[]
   allergies                           Allergy[]
   culturalFits                        CulturalFit[]
+  reasonsForUsing                     ReasonForUsing[]
+  preferedDates                       ReferedDate[]
+  loveLanguage                        LoveLanguage[]
 
   @@map("profiles")
+}
+
+model LoveLanguage {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("LoveLanguageCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("LoveLanguageUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  Profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+
+  @@map("love-languages")
+}
+
+model ReferedDate {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("ReferedDateCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("ReferedDateUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  Profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+
+  @@map("refered_dates")
+}
+
+model ReasonForUsing {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("ResonForUsingCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("ReasonForUsingUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  Profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+
+  @@map("reasons_for_using")
 }
 
 model CulturalFit {
@@ -268,8 +328,7 @@ model Allergy {
 
 model RelationshipStatus {
   id       Int       @id @default(autoincrement())
-  status   String    @db.VarChar(255)
-  // relation defined on Profile (relationshipStatusId)
+  name     String    @db.VarChar(255)
   profiles Profile[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -285,8 +344,7 @@ model RelationshipStatus {
 
 model IncomeRange {
   id       Int       @id @default(autoincrement())
-  range    String    @db.VarChar(255)
-  // relation defined on Profile (incomeRangeId)
+  name     String    @db.VarChar(255)
   profiles Profile[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -336,7 +394,7 @@ model Occupation {
 
 model Relocation {
   id        Int      @id @default(autoincrement())
-  location  String   @db.VarChar(255)
+  name      String   @db.VarChar(255)
   profileId Int?     @map("profile_id")
   profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
