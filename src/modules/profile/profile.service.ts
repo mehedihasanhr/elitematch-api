@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { paginate } from 'src/utils/paginate';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
@@ -77,6 +81,13 @@ export class ProfileService {
         coverIds.push(savedFile.id);
       }
     }
+
+    const existingProfile = await this.prisma.profile.findUnique({
+      where: { userId: data.userId },
+    });
+
+    if (existingProfile)
+      throw new BadRequestException('User already has a profile');
 
     const payload: Prisma.ProfileUncheckedCreateInput = {
       userId: data.userId,
