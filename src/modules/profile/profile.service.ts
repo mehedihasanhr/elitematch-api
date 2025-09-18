@@ -42,7 +42,7 @@ export class ProfileService {
         connect: coverIds.map((id) => ({ id })),
       },
       introductionVideoLink: data.introductionVideoLink,
-      dateOfBirth: new Date(data.dateOfBirth),
+      dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
       occupationId: data.occupationId ?? undefined,
       educationLevelId: data.educationLevelId ?? undefined,
       incomeRangeId: data.incomeRangeId ?? undefined,

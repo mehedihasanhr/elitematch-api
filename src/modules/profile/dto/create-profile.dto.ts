@@ -46,7 +46,7 @@ export class CreateProfileDto {
   })
   @IsDateString()
   @IsNotEmpty()
-  dateOfBirth: string;
+  dateOfBirth?: string;
 
   @ApiPropertyOptional({
     example: 3,
