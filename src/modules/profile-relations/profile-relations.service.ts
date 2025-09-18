@@ -54,6 +54,7 @@ export class ProfileRelationsService {
     'loveLanguage',
     'preferredDate',
     'reasonForUsing',
+    'culturalFit',
   ]);
 
   private modelNameToPrismaKey(name: string) {
@@ -90,6 +91,7 @@ export class ProfileRelationsService {
       'loveLanguage',
       'preferredDate',
       'reasonForUsing',
+      'culturalFit',
     ];
 
     const inputKey = canonical(name);

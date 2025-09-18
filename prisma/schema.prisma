@@ -83,6 +83,8 @@ model User {
   allergies                           Allergy[]                     @relation("AllergyCreator")
   updatedAllergies                    Allergy[]                     @relation("AllergyUpdatedBy")
   notes                               Note[]
+  culturalFit                         CulturalFit[]                 @relation("CulturalCreator")
+  updateCulturalFit                   CulturalFit[]                 @relation("CulturalUpdatedBy")
 
   @@map("users")
 }
@@ -225,8 +227,26 @@ model Profile {
   socialCircles                       SocialCircle[]
   luxuryAlignment                     LuxuryAlignment[]
   allergies                           Allergy[]
+  culturalFits                        CulturalFit[]
 
   @@map("profiles")
+}
+
+model CulturalFit {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int      @map("created_by")
+  creator   User     @relation("CulturalCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy Int      @map("updated_by")
+  updator   User     @relation("CulturalUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
+  Profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+
+  @@map("cultural_fits")
 }
 
 model Allergy {

@@ -460,4 +460,15 @@ export class CreateProfileDto {
   @IsArray()
   @IsNumber({}, { each: true })
   allergies?: number[];
+
+  @ApiPropertyOptional({
+    example: [1, 2],
+    description: 'Array of cultural fit IDs',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  culturalFits?: number[];
 }
