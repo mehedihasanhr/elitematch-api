@@ -26,17 +26,21 @@ export class ProfileService {
    * @param data - DTO containing profile fields supplied by the client.
    * @returns The newly created profile record.
    */
-  async create(data: CreateProfileDto, file: Express.Multer.File) {
-    let coverId: number | null = null;
+  async create(data: CreateProfileDto, files: Express.Multer.File[]) {
+    const coverIds: number[] = [];
 
-    if (file) {
-      const savedFile = await this.fileService.processAndSaveFile(file);
-      coverId = savedFile.id;
+    if (files) {
+      for (const file of files) {
+        const savedFile = await this.fileService.processAndSaveFile(file);
+        coverIds.push(savedFile.id);
+      }
     }
 
     const payload: Prisma.ProfileUncheckedCreateInput = {
       userId: data.userId,
-      avatarId: coverId ?? undefined,
+      avatars: {
+        connect: coverIds.map((id) => ({ id })),
+      },
       introductionVideoLink: data.introductionVideoLink,
       dateOfBirth: new Date(data.dateOfBirth),
       occupationId: data.occupationId ?? undefined,
@@ -65,14 +69,19 @@ export class ProfileService {
     const profile = await this.prisma.profile.create({ data: payload });
 
     // record file use
-    if (coverId) {
-      await this.prisma.fileUsage.create({
-        data: {
-          fileId: coverId,
-          model: 'profile',
-          modelId: profile.id,
-        },
-      });
+    if (coverIds) {
+      await Promise.all(
+        coverIds.map(
+          async (id) =>
+            await this.prisma.fileUsage.create({
+              data: {
+                fileId: id,
+                model: 'profile',
+                modelId: profile.id,
+              },
+            }),
+        ),
+      );
     }
 
     return profile;

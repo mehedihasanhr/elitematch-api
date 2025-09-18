@@ -1,29 +1,29 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
+  Delete,
   Get,
   Param,
-  Put,
-  Delete,
-  Query,
   ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
   UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBody,
+  ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
-import { ProfileService } from './profile.service';
+import { multerOptions } from '../../cores/config/multer.conf';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '../../cores/config/multer.conf';
+import { ProfileService } from './profile.service';
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -35,16 +35,11 @@ export class ProfileController {
   constructor(private readonly service: ProfileService) {}
 
   /**
-   * HTTP POST /profiles
-   *
-   * Create a new profile resource. The request body is validated by DTO
-   * annotations and then delegated to the service layer for persistence.
-   *
    * @param dto - CreateProfileDto containing the profile payload.
    * @returns The created profile record.
    */
   @Post()
-  @UseInterceptors(FileInterceptor('avatar', multerOptions))
+  @UseInterceptors(FilesInterceptor('avatars', 10, multerOptions))
   @ApiOperation({ summary: 'Create profile' })
   @ApiBody({ type: CreateProfileDto })
   @ApiResponse({
@@ -57,9 +52,9 @@ export class ProfileController {
   })
   create(
     @Body() dto: CreateProfileDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.service.create(dto, file);
+    return this.service.create(dto, files);
   }
 
   @Get()
