@@ -844,10 +844,9 @@ model BlogCategory {
 }
 
 model BlogTag {
-  id     Int    @id @default(autoincrement())
-  name   String @db.VarChar(50)
-  blogId Int    @map("blog_id")
-  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(255)
+  blogs Blog[]
 
   @@map("blog_tags")
 }
