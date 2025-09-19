@@ -91,6 +91,10 @@ model User {
   updateReferedDate                   PreferedDate[]                @relation("ReferedDateUpdatedBy")
   loveLanguage                        LoveLanguage[]                @relation("LoveLanguageCreator")
   updateLoveLanguage                  LoveLanguage[]                @relation("LoveLanguageUpdatedBy")
+  matchCouples                        MatchCouple[]                 @relation("MatchMaker")
+  matchCouplesA                       MatchCouple[]                 @relation("CoupleA")
+  matchCouplesB                       MatchCouple[]                 @relation("CoupleB")
+  matchCouplesCreator                 MatchCouple[]                 @relation("MatchCoupleCreator")
 
   @@map("users")
 }
@@ -142,6 +146,46 @@ model MatchMaker {
 
   @@index([userId], name: "idx_match_maker_user_id")
   @@map("match_makers")
+}
+
+enum MatchStatus {
+  BAD
+  OK
+  GOOD
+  GREAT
+  EXCELLENT
+}
+
+enum MatchStage {
+  INITIAL
+  CONTACTED
+  INTERVIEWED
+  MEETING_SCHEDULED
+  FEEDBACK_RECEIVED
+  FOLLOW_UP
+  CLOSED
+}
+
+model MatchCouple {
+  id           Int         @id @default(autoincrement())
+  matchMakerId Int         @map("match_maker_id")
+  matchMaker   User        @relation("MatchMaker", fields: [matchMakerId], references: [id], onDelete: Cascade)
+  coupleAId    Int         @map("couple_a_id")
+  coupleA      User        @relation("CoupleA", fields: [coupleAId], references: [id], onDelete: Cascade)
+  coupleBId    Int         @map("couple_b_id")
+  coupleB      User        @relation("CoupleB", fields: [coupleBId], references: [id], onDelete: Cascade)
+  matchStatus  MatchStatus @map("match_status")
+  stage        MatchStage  @default(INITIAL)
+  isActive     Boolean     @default(true) @map("is_active")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  creatorId    Int         @map("creatorId")
+  creator      User        @relation("MatchCoupleCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([matchMakerId], name: "idx_match_couple_match_maker_id")
+  @@index([coupleAId], name: "idx_match_couple_couple_a_id")
+  @@index([coupleBId], name: "idx_match_couple_couple_b_id")
+  @@map("match_couples")
 }
 
 model Role {
@@ -917,7 +961,7 @@ enum GoogleScriptType {
   OTHER
 }
 
-model GoolgeScript {
+model GoogleScript {
   id        Int              @id @default(autoincrement())
   title     String           @db.VarChar(255)
   gtype     GoogleScriptType @map("gtype")

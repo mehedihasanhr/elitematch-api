@@ -1,16 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { MatchCalculatorService } from './match-calculator.service';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Auth } from '../auth/auth.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateMatchCalculatorDto } from './dto/create-match-calculator.dto';
-import { UpdateMatchCalculatorDto } from './dto/update-match-calculator.dto';
+import { MatchCalculatorService } from './match-calculator.service';
 
 @ApiTags('match-calculator')
 @Controller('match-calculator')
@@ -20,31 +13,17 @@ export class MatchCalculatorController {
   ) {}
 
   @Post()
-  create(@Body() createMatchCalculatorDto: CreateMatchCalculatorDto) {
-    return this.matchCalculatorService.create(createMatchCalculatorDto);
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Body() createMatchCalculatorDto: CreateMatchCalculatorDto,
+    @Auth('id') authId: number,
+  ) {
+    return this.matchCalculatorService.create(createMatchCalculatorDto, authId);
   }
 
   @Get()
   findAll() {
     return this.matchCalculatorService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.matchCalculatorService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateMatchCalculatorDto: UpdateMatchCalculatorDto,
-  ) {
-    return this.matchCalculatorService.update(+id, updateMatchCalculatorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.matchCalculatorService.remove(+id);
   }
 
   @Get('calculate/:userAId/:userBId')

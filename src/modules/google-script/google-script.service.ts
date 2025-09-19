@@ -8,7 +8,7 @@ export class GoogleScriptService {
   constructor(private prisma: PrismaService) {}
 
   async create(createGoogleScriptDto: CreateGoogleScriptDto) {
-    const googleScript = await this.prisma.goolgeScript.create({
+    const googleScript = await this.prisma.googleScript.create({
       data: { ...createGoogleScriptDto },
     });
 
@@ -21,18 +21,18 @@ export class GoogleScriptService {
   }
 
   findAll() {
-    return this.prisma.goolgeScript.findMany();
+    return this.prisma.googleScript.findMany();
   }
 
   async update(id: number, updateGoogleScriptDto: UpdateGoogleScriptDto) {
-    return this.prisma.goolgeScript.update({
+    return this.prisma.googleScript.update({
       where: { id },
       data: { ...updateGoogleScriptDto },
     });
   }
 
   async remove(id: number) {
-    await this.prisma.goolgeScript.delete({ where: { id } });
+    await this.prisma.googleScript.delete({ where: { id } });
     return {
       data: null,
       message: 'Google Script deleted successfully',
