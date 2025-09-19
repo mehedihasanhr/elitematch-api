@@ -17,22 +17,29 @@ export class BlogCategoryService {
   /**
    * Create a new blog category
    */
-  async create(data: CreateBlogCategoryDto): Promise<BlogCategory> {
-    const payload: Prisma.BlogCategoryCreateInput = {
-      name: data.name,
-      slug: data.slug,
-    } as Prisma.BlogCategoryCreateInput;
-
-    return this.prisma.blogCategory.create({ data: payload });
+  async create(data: CreateBlogCategoryDto) {
+    const category = await this.prisma.blogCategory.create({ data });
+    return {
+      data: category,
+      message: 'Blog category created successfully',
+      status: 'success',
+      statusCode: 201,
+    };
   }
 
   /**
    * List all blog categories
    */
-  async findAll() {
+  async findAll(query: Record<string, any>) {
+    const page = query.page ? parseInt(query.page as string, 10) : 1;
+    const limit = query.limit ? parseInt(query.limit as string, 10) : 100;
+    const skip = (page - 1) * limit;
+
     // default to returning paginated result for future compatibility
     const total = await this.prisma.blogCategory.count();
     const items = await this.prisma.blogCategory.findMany({
+      skip,
+      take: limit,
       orderBy: { id: 'asc' },
     });
 

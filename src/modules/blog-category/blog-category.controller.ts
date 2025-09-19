@@ -42,9 +42,8 @@ export class BlogCategoryController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of categories' })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
-    // the service currently returns all items; keep compatibility
-    return this.service.findAll();
+  findAll(@Query() query: Record<string, any>) {
+    return this.service.findAll(query);
   }
 
   @Get(':id')
