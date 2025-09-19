@@ -47,7 +47,6 @@ export class BlogController {
       type: 'object',
       properties: {
         title: { type: 'string', example: 'Blog Title' },
-        slug: { type: 'string', example: 'blog-slug' },
         content: { type: 'string', example: 'Blog content...' },
         authorId: { type: 'number', example: 1 },
         isPublished: { type: 'boolean', example: true },
