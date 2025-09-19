@@ -1,9 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateBlogCategoryDto } from './create-blog-category.dto';
 
-export class UpdateBlogCategoryDto {
-  @ApiProperty({ example: 'Technology', required: false })
-  name?: string;
-
-  @ApiProperty({ example: 'technology', required: false })
-  slug?: string;
-}
+export class UpdateBlogCategoryDto extends PartialType(CreateBlogCategoryDto) {}
