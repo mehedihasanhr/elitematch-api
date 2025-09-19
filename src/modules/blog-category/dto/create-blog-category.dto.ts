@@ -6,9 +6,4 @@ export class CreateBlogCategoryDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @ApiProperty({ example: 'technology' })
-  @IsString()
-  @IsNotEmpty()
-  slug: string;
 }

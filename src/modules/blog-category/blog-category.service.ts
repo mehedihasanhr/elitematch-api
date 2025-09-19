@@ -4,11 +4,7 @@ import type { Prisma, BlogCategory } from '@prisma/client';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { UpdateBlogCategoryDto } from './dto/update-blog-category.dto';
 import { paginate } from 'src/utils/paginate';
-
-/**
- * Shape of a blog_categories row returned from raw SQL.
- */
-// Using Prisma model types instead of raw SQL records
+import slugify from 'slugify';
 
 @Injectable()
 export class BlogCategoryService {
@@ -18,7 +14,17 @@ export class BlogCategoryService {
    * Create a new blog category
    */
   async create(data: CreateBlogCategoryDto) {
-    const category = await this.prisma.blogCategory.create({ data });
+    let slug = slugify(data.name);
+    let counter = 1;
+    while (
+      await this.prisma.blog.findUnique({ where: { slug } }).catch(() => null)
+    ) {
+      slug = `${slug}-${counter++}`;
+    }
+
+    const category = await this.prisma.blogCategory.create({
+      data: { ...data, slug },
+    });
     return {
       data: category,
       message: 'Blog category created successfully',
@@ -62,7 +68,6 @@ export class BlogCategoryService {
     const payload: Prisma.BlogCategoryUpdateInput =
       {} as Prisma.BlogCategoryUpdateInput;
     if (data.name !== undefined) payload.name = data.name;
-    if (data.slug !== undefined) payload.slug = data.slug;
 
     if (Object.keys(payload).length === 0) return this.findOne(id);
 

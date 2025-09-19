@@ -27,6 +27,7 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../../cores/config/multer.conf';
+import { Auth } from '../auth/auth.decorator';
 
 @ApiTags('blogs')
 @Controller('blogs')
@@ -60,11 +61,13 @@ export class BlogController {
     },
   })
   @ApiResponse({ status: 201, description: 'Blog created' })
+  @UseGuards(JwtAuthGuard)
   create(
     @Body() dto: CreateBlogDto,
     @UploadedFile() file?: Express.Multer.File,
+    @Auth('id') authId?: number,
   ) {
-    return this.service.create(dto, file);
+    return this.service.create(dto, file, authId);
   }
 
   @Get()

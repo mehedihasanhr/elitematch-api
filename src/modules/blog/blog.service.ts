@@ -5,6 +5,7 @@ import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import slugify from 'slugify';
 
 @Injectable()
 export class BlogService {
@@ -21,7 +22,11 @@ export class BlogService {
    * @param data - DTO containing blog fields
    * @returns The created blog record
    */
-  async create(data: CreateBlogDto, file?: Express.Multer.File) {
+  async create(
+    data: CreateBlogDto,
+    file?: Express.Multer.File,
+    authId?: number,
+  ) {
     let coverId: number | null = null;
 
     if (file) {
@@ -29,11 +34,19 @@ export class BlogService {
       coverId = savedFile.id;
     }
 
+    let slug = slugify(data.title);
+    let counter = 1;
+    while (
+      await this.prisma.blog.findUnique({ where: { slug } }).catch(() => null)
+    ) {
+      slug = `${slug}-${counter++}`;
+    }
+
     const payload: Prisma.BlogUncheckedCreateInput = {
       title: data.title,
-      slug: data.slug,
+      slug,
       content: data.content,
-      authorId: data.authorId,
+      authorId: authId,
       isPublished: data.isPublished ?? false,
       categoryId: data.categoryId ?? null,
       coverImageId: coverId,
