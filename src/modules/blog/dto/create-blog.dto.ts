@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -21,6 +21,7 @@ export class CreateBlogDto {
   content: string;
 
   @ApiProperty({ example: false })
+  @Type(() => Boolean)
   @IsBoolean()
   @IsOptional()
   isPublished?: boolean;
@@ -30,9 +31,18 @@ export class CreateBlogDto {
   @IsInt()
   categoryId?: number;
 
-  @ApiProperty({ example: [1, 2], required: false })
-  @Type(() => Number)
-  @IsArray({ each: true })
-  @IsNotEmpty({ message: 'Tag IDs must not be empty' })
+  @ApiProperty({ example: [1, 2], required: false, type: [Number] })
+  @IsArray()
+  @IsInt({ each: true }) // validate that each element is an int
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((id) => parseInt(id, 10));
+    }
+    if (typeof value === 'string') {
+      // multiple values from FormData (tagIds=1&tagIds=2) will arrive as string | string[]
+      return [parseInt(value, 10)];
+    }
+    return [];
+  })
   tagIds?: number[];
 }
