@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
+import slugify from 'slugify';
 import { FileService } from 'src/cores/modules/file/file.service';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import slugify from 'slugify';
 
 @Injectable()
 export class BlogService {
@@ -50,6 +50,9 @@ export class BlogService {
       isPublished: data.isPublished ?? false,
       categoryId: data.categoryId ?? null,
       coverImageId: coverId,
+      blogTags: data.tagIds
+        ? { connect: data.tagIds.map((id) => ({ id })) }
+        : undefined,
     } as Prisma.BlogUncheckedCreateInput;
 
     const blog = await this.prisma.blog.create({ data: payload });
@@ -86,6 +89,12 @@ export class BlogService {
       skip: (currentPage - 1) * take,
       take,
       orderBy: { id: 'desc' },
+      include: {
+        author: true,
+        category: true,
+        coverImage: true,
+        blogTags: true,
+      },
     });
 
     return paginate(items, { total, page: currentPage, limit: take });
@@ -98,7 +107,15 @@ export class BlogService {
    * @returns blog record
    */
   async findOne(id: number) {
-    const item = await this.prisma.blog.findUnique({ where: { id } });
+    const item = await this.prisma.blog.findUnique({
+      where: { id },
+      include: {
+        author: true,
+        category: true,
+        coverImage: true,
+        blogTags: true,
+      },
+    });
     if (!item) throw new NotFoundException('Blog not found');
     return item;
   }
@@ -138,10 +155,11 @@ export class BlogService {
     const payload: Prisma.BlogUncheckedUpdateInput =
       {} as Prisma.BlogUncheckedUpdateInput;
     if (data.title !== undefined) payload.title = data.title;
-    if (data.slug !== undefined) payload.slug = data.slug;
     if (data.content !== undefined) payload.content = data.content;
     if (data.isPublished !== undefined) payload.isPublished = data.isPublished;
     if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
+    if (data.tagIds !== undefined)
+      payload.blogTags = { connect: data.tagIds.map((id) => ({ id })) };
 
     const blog = await this.prisma.blog.update({
       where: { id },
