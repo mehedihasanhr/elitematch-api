@@ -24,6 +24,7 @@ export class PermissionController {
     return this.permissionService.create(createPermissionDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {

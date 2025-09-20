@@ -27,9 +27,20 @@ export class PermissionService {
    * Find all permissions
    */
   async findAll() {
-    return this.prisma.permission.groupBy({
-      by: ['model'],
-    });
+    const permissions = await this.prisma.permission.findMany();
+
+    const grouped = permissions.reduce(
+      (acc, perm) => {
+        if (!acc[perm.model]) {
+          acc[perm.model] = [];
+        }
+        acc[perm.model].push(perm);
+        return acc;
+      },
+      {} as Record<string, typeof permissions>,
+    );
+
+    return grouped;
   }
 
   /**
