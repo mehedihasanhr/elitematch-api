@@ -47,6 +47,7 @@ export class BlogSeoService {
         take: limit,
         where,
         orderBy: { id: 'desc' },
+        include: { blog: true },
       }),
       this.prisma.blogSEO.count(),
     ]);
@@ -61,6 +62,7 @@ export class BlogSeoService {
   findOne(id: number) {
     return this.prisma.blogSEO.findUnique({
       where: { id },
+      include: { blog: true },
     });
   }
 

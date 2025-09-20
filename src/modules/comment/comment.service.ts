@@ -55,6 +55,7 @@ export class CommentService {
               avatar: true,
             },
           },
+          blog: true,
         },
       }),
       this.prisma.comment.count(),
