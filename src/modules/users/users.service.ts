@@ -30,7 +30,17 @@ export class UsersService {
           lastName: true,
           avatarId: true,
           avatar: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          profile: {
+            select: {
+              avatars: true,
+            },
+          },
         },
+        where: { ...where },
       }),
       this.prisma.user.count(),
     ]);
