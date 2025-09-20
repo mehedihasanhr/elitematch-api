@@ -15,7 +15,7 @@ export class RoleService {
    * @param createRoleDto - DTO containing role fields
    */
   async create(createRoleDto: CreateRoleDto) {
-    const { rolePermissionIds, name } = createRoleDto;
+    const { permissionIds, name } = createRoleDto;
     let slug = slugify(name, { lower: true });
     let counter = 1;
     while (
@@ -28,9 +28,9 @@ export class RoleService {
       data: {
         name: createRoleDto.name,
         slug,
-        rolePermission: rolePermissionIds
+        permissions: permissionIds
           ? {
-              connect: rolePermissionIds.map((permissionId) => ({
+              connect: permissionIds.map((permissionId) => ({
                 id: permissionId,
               })),
             }
@@ -74,7 +74,7 @@ export class RoleService {
     const role = await this.prisma.role.findUnique({
       where: { id },
       include: {
-        rolePermission: true,
+        permissions: true,
       },
     });
 
@@ -87,15 +87,15 @@ export class RoleService {
    * @param updateRoleDto - DTO containing updated role fields
    */
   async update(id: number, updateRoleDto: UpdateRoleDto) {
-    const { rolePermissionIds, ...data } = updateRoleDto;
+    const { permissionIds, ...data } = updateRoleDto;
     const existingRole = await this.prisma.role.findUnique({ where: { id } });
     if (!existingRole) throw new BadRequestException('Role not found');
 
     const payload: Prisma.RoleUpdateInput = {
       ...data,
-      rolePermission: rolePermissionIds
+      permissions: permissionIds
         ? {
-            connect: rolePermissionIds.map((permissionId) => ({
+            connect: permissionIds.map((permissionId) => ({
               id: permissionId,
             })),
           }

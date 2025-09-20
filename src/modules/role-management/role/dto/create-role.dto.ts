@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsString,
@@ -9,11 +10,22 @@ import {
 } from 'class-validator';
 
 export class CreateRoleDto {
+  @ApiProperty({
+    example: 'super_admin',
+    description: 'Name of the role e.g., admin, user, moderator)',
+    required: true,
+  })
   @IsString()
   @IsNotEmpty({ message: 'Role name is required' })
   @MaxLength(50, { message: 'Role name must be at most 50 characters long' })
   name: string;
 
+  @ApiProperty({
+    example: [1, 2, 3],
+    description: 'Array of permission IDs associated with this role',
+    required: false,
+    type: [Number],
+  })
   @IsOptional()
   @Transform(({ value }: { value: any }) => {
     if (Array.isArray(value)) {
@@ -27,5 +39,5 @@ export class CreateRoleDto {
   })
   @IsArray()
   @IsNumber({}, { each: true })
-  rolePermissionIds?: number[];
+  permissionIds?: number[];
 }
