@@ -30,7 +30,7 @@ import { Auth } from '../auth/auth.decorator';
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
-  @Post()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new comment' })
   @ApiBody({ type: CreateCommentDto })
@@ -38,14 +38,7 @@ export class CommentController {
     status: 201,
     description: 'Comment created successfully',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - invalid data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
+  @Post()
   create(
     @Body() createCommentDto: CreateCommentDto,
     @Auth('id') authId: number,

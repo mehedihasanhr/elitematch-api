@@ -62,17 +62,14 @@ async function bootstrap() {
     .addTag('users', '👥 User Management')
     .addTag('profiles', '📝 Profile Management')
     .addTag('matching', '💝 Matchmaking Services')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token (without "Bearer" prefix)',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'JWT',
+      description: 'Enter JWT token (without "Bearer" prefix)',
+      in: 'header',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

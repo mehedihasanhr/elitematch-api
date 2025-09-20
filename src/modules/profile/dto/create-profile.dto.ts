@@ -16,7 +16,7 @@ export class CreateProfileDto {
     description: 'User ID owning the profile',
     required: true,
   })
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }) => parseInt(value as string, 10))
   @IsInt()
   @IsNotEmpty()
   userId: number;
@@ -27,7 +27,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : undefined))
   @IsInt()
   avatarId?: number;
 
@@ -55,7 +55,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : undefined))
   @IsInt()
   occupationId?: number;
 
@@ -65,7 +65,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : undefined))
   @IsInt()
   educationLevelId?: number;
 
@@ -75,7 +75,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : undefined))
   @IsInt()
   incomeRangeId?: number;
 
@@ -85,7 +85,7 @@ export class CreateProfileDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : undefined))
   @IsInt()
   relationshipStatusId?: number;
 
@@ -168,7 +168,7 @@ export class CreateProfileDto {
     default: 0,
   })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : 0))
+  @Transform(({ value }) => (value ? parseInt(value as string, 10) : 0))
   @IsInt()
   noOfChildren?: number;
 
@@ -236,9 +236,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -254,9 +254,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -272,9 +272,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -290,9 +290,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -308,9 +308,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -326,9 +326,9 @@ export class CreateProfileDto {
   @IsOptional()
   @Transform(({ value }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()
@@ -684,11 +684,11 @@ export class CreateProfileDto {
     type: [Number],
   })
   @IsOptional()
-  @Transform(({ value }) =>
+  @Transform(({ value }: { value: any }) =>
     Array.isArray(value)
-      ? value.map((v) => parseInt(v, 10))
+      ? value.map((v) => parseInt(v as string, 10))
       : value
-        ? [parseInt(value, 10)]
+        ? [parseInt(value as string, 10)]
         : [],
   )
   @IsArray()

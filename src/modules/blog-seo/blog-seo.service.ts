@@ -35,7 +35,6 @@ export class BlogSeoService {
 
     const where: Record<string, unknown> = {};
 
-    where['deletedAt'] = null;
     where['blogId'] = query.blogId
       ? parseInt(query.blogId as string, 10)
       : undefined;
