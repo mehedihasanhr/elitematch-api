@@ -200,14 +200,21 @@ model Role {
   @@map("roles")
 }
 
+enum PermissionType {
+  create
+  update
+  read
+  delete
+}
+
 model Permission {
   id             Int              @id @default(autoincrement())
   name           String           @db.VarChar(255)
-  permission     String           @db.VarChar(255)
+  permission     PermissionType?
   model          String           @db.VarChar(255)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
-  RolePermission RolePermission[]
+  rolePermission RolePermission[]
 
   @@map("permissions")
 }

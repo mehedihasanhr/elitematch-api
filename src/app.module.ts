@@ -25,6 +25,7 @@ import { SiteMetadataModule } from './modules/site-metadata/site-metadata.module
 import { GoogleScriptModule } from './modules/google-script/google-script.module';
 import { QuickLinkModule } from './modules/quick-link/quick-link.module';
 import { BlogTagModule } from './modules/blog-tag/blog-tag.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { BlogTagModule } from './modules/blog-tag/blog-tag.module';
     GoogleScriptModule,
     QuickLinkModule,
     BlogTagModule,
+    RoleModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
