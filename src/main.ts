@@ -58,10 +58,6 @@ async function bootstrap() {
       process.env.PROD_SERVER_URL || 'http://localhost:14001',
       'Production Server',
     )
-    .addTag('auth', '🔐 Authentication & Authorization')
-    .addTag('users', '👥 User Management')
-    .addTag('profiles', '📝 Profile Management')
-    .addTag('matching', '💝 Matchmaking Services')
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',

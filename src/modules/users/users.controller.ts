@@ -1,12 +1,24 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import {
-  ApiTags,
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+import { UserRoleUpdateDto } from './dto/user-role-update.dto';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -56,5 +68,21 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async findById(@Param('id', ParseIntPipe) id: number) {
     return this.service.findById(id);
+  }
+
+  /**
+   * Update user role by user ID.
+   */
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update user role by ID' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'User role updated successfully' })
+  async updateUserRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UserRoleUpdateDto,
+  ) {
+    await this.service.updateUserRole(id, dto);
   }
 }

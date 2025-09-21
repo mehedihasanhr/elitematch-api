@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
+import { UserRoleUpdateDto } from './dto/user-role-update.dto';
 
 @Injectable()
 export class UsersService {
@@ -55,6 +56,24 @@ export class UsersService {
   async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+    });
+    return user;
+  }
+
+  /**
+   * Update a user's role by their ID.
+   * @param id - The ID of the user to update.
+   * @param dto - Data Transfer Object containing the new role ID.
+   */
+  async updateUserRole(id: number, dto: UserRoleUpdateDto) {
+    const existingUser = await this.prisma.user.findUnique({ where: { id } });
+    if (!existingUser) throw new NotFoundException('User not found');
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        role: dto.roleId ? { connect: { id: dto.roleId } } : undefined,
+      },
     });
     return user;
   }
