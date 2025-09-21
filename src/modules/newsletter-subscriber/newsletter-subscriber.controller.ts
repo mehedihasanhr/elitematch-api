@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { CreateNewsletterSubscriberDto } from './dto/create-newsletter-subscriber.dto';
 import { NewsletterSubscriberService } from './newsletter-subscriber.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('newsletter-subscriber')
 @Controller('newsletter-subscriber')
 export class NewsletterSubscriberController {
   constructor(

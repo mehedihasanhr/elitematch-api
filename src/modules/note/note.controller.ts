@@ -14,7 +14,9 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Auth } from '../auth/auth.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('notes')
 @Controller('note')
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}

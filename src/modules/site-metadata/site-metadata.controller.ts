@@ -15,7 +15,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateSiteMetadatumDto } from './dto/create-site-metadatum.dto';
 import { UpdateSiteMetadatumDto } from './dto/update-site-metadatum.dto';
 import { SiteMetadataService } from './site-metadata.service';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('site-metadata')
 @Controller('site-metadata')
 export class SiteMetadataController {
   constructor(private readonly siteMetadataService: SiteMetadataService) {}
@@ -25,6 +27,17 @@ export class SiteMetadataController {
    */
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateSiteMetadatumDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        logo: { type: 'string', format: 'binary' },
+        favicon: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -56,6 +69,18 @@ export class SiteMetadataController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateSiteMetadatumDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        logo: { type: 'string', format: 'binary' },
+        favicon: { type: 'string', format: 'binary' },
+      },
+      required: [],
+    },
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [

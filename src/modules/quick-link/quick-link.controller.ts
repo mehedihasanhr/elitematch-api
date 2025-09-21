@@ -10,7 +10,9 @@ import {
 import { QuickLinkService } from './quick-link.service';
 import { CreateQuickLinkDto } from './dto/create-quick-link.dto';
 import { UpdateQuickLinkDto } from './dto/update-quick-link.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('quick-link')
 @Controller('quick-link')
 export class QuickLinkController {
   constructor(private readonly quickLinkService: QuickLinkService) {}

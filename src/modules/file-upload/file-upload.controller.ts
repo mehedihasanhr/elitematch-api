@@ -15,9 +15,11 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { multerOptions } from 'src/cores/config/multer.conf';
 
+@ApiTags('file-uploads')
 @Controller('upload')
 export class FileUploadController {
   constructor(private service: FileUploadService) {}
