@@ -59,6 +59,7 @@ export class RoleService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { id: 'desc' },
+        include: { permissions: true },
       }),
       this.prisma.role.count(),
     ]);
