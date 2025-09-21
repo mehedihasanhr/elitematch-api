@@ -28,10 +28,10 @@ export class MatchMakersService {
    * @param createMatchMakerDto - Data Transfer Object containing MatchMaker details.
    * @param userId - ID of the user to associate with the MatchMaker.
    */
-  async create(createMatchMakerDto: CreateMatchMakerDto, userId: number) {
+  async create(createMatchMakerDto: CreateMatchMakerDto) {
     const matcher = await this.prisma.matchMaker.create({
       data: {
-        user: { connect: { id: userId } },
+        user: { connect: { id: createMatchMakerDto.userId } },
         experienceYears: createMatchMakerDto.experienceYear,
         active: createMatchMakerDto.active,
       },

@@ -22,4 +22,14 @@ export class CreateMatchMakerDto {
   @IsBoolean()
   @IsNotEmpty({ message: 'Active status is required' })
   active?: true;
+
+  @ApiProperty({
+    name: 'userId',
+    required: true,
+    example: 1,
+  })
+  @Type(() => Number)
+  @IsInt()
+  @IsNotEmpty({ message: 'User ID is required' })
+  userId: number;
 }
