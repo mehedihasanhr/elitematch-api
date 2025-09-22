@@ -49,12 +49,15 @@ export class CmsController {
     return this.cmsService.findAll(query);
   }
 
-  @Get(':id')
+  /**
+   * Get cms data by cms id or slug
+   */
+  @Get(':slugOrId')
   @ApiOperation({ summary: 'Get CMS entry by id' })
   @ApiOkResponse({ description: 'CMS entry found' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.cmsService.findOne(id);
+  findOne(@Param('slugOrId') slugOrId: string) {
+    return this.cmsService.findOne(slugOrId);
   }
 
   @Put(':id')

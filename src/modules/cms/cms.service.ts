@@ -66,8 +66,17 @@ export class CmsService {
     };
   }
 
-  async findOne(id: number): Promise<Cms> {
-    const record = await this.prisma.cms.findUnique({ where: { id } });
+  /**
+   * Get cms data by cms id or slug
+   * @param slugOrId - slug or id of the cms entry
+   */
+  async findOne(slugOrId: string) {
+    const where: Prisma.CmsWhereUniqueInput =
+      isNaN(Number(slugOrId)) === false
+        ? { id: Number(slugOrId) }
+        : { slug: slugOrId };
+
+    const record = await this.prisma.cms.findUnique({ where });
     if (!record) throw new NotFoundException('CMS entry not found');
     return record;
   }
