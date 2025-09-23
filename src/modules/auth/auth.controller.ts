@@ -102,9 +102,12 @@ export class AuthController {
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     this.clearRefreshCookie(res);
-    return {
+    res.json({
       message: 'Logged out successfully',
-    };
+      data: null,
+      status: 'success',
+      statusCode: 200,
+    });
   }
 
   /**
@@ -119,8 +122,6 @@ export class AuthController {
     const cookieName =
       this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
     const oldRefreshToken = req?.cookies ? req.cookies[cookieName] : undefined;
-
-    console.log('Old Refresh Token:', oldRefreshToken);
 
     if (!oldRefreshToken) {
       throw new BadRequestException('Invalid Session, please log in again');
