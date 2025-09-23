@@ -100,14 +100,16 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    this.clearRefreshCookie(res);
-    res.json({
+  async logout(@Res() res: Response) {
+    await this.clearRefreshCookie(res);
+    const resData = {
       message: 'Logged out successfully',
       data: null,
       status: 'success',
       statusCode: 200,
-    });
+      accessToken: null,
+    };
+    return res.json(resData);
   }
 
   /**
@@ -163,10 +165,10 @@ export class AuthController {
     res.setHeader('Set-Cookie', parts.join('; '));
   }
 
-  /**
+  /** '33e3ce507705cc543171a0c9=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0'
    * Clear the refresh token cookie by setting Max-Age=0 with same attributes.
    */
-  private clearRefreshCookie(res: Response) {
+  private async clearRefreshCookie(res: Response) {
     const secure = this.config.get<string>('NODE_ENV') === 'production';
     const sameSiteEnv = process.env.COOKIE_SAMESITE || 'Lax';
     const sameSite = ['Lax', 'Strict', 'None'].includes(sameSiteEnv)
@@ -182,7 +184,12 @@ export class AuthController {
       'Max-Age=0',
     ];
     if (secure || sameSite === 'None') parts.push('Secure');
+
     res.setHeader('Set-Cookie', parts.join('; '));
+
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
   }
 
   /**
