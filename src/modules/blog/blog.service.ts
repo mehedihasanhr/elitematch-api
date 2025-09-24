@@ -34,7 +34,7 @@ export class BlogService {
       coverId = savedFile.id;
     }
 
-    let slug = slugify(data.title);
+    let slug = slugify(data.title, { lower: true, strict: true });
     let counter = 1;
     while (
       await this.prisma.blog.findUnique({ where: { slug } }).catch(() => null)
@@ -48,6 +48,9 @@ export class BlogService {
       content: data.content,
       authorId: authId,
       isPublished: data.isPublished ?? false,
+      isFeatured: data.isFeatured ?? false,
+      isPopular: data.isPopular ?? false,
+      isTrending: data.isTrending ?? false,
       categoryId: data.categoryId ?? null,
       coverImageId: coverId,
       blogTags: data.tagIds
@@ -158,6 +161,9 @@ export class BlogService {
     if (data.content !== undefined) payload.content = data.content;
     if (data.isPublished !== undefined) payload.isPublished = data.isPublished;
     if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
+    if (data.isFeatured !== undefined) payload.isFeatured = data.isFeatured;
+    if (data.isPopular !== undefined) payload.isPopular = data.isPopular;
+    if (data.isTrending !== undefined) payload.isTrending = data.isTrending;
     if (data.tagIds !== undefined)
       payload.blogTags = { connect: data.tagIds.map((id) => ({ id })) };
 

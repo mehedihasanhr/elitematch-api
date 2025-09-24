@@ -14,7 +14,7 @@ export class BlogCategoryService {
    * Create a new blog category
    */
   async create(data: CreateBlogCategoryDto) {
-    let slug = slugify(data.name);
+    let slug = slugify(data.name, { lower: true, strict: true });
     let counter = 1;
     while (
       await this.prisma.blog.findUnique({ where: { slug } }).catch(() => null)

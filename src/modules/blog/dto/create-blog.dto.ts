@@ -26,6 +26,42 @@ export class CreateBlogDto {
   @IsOptional()
   isPublished?: boolean;
 
+  @ApiProperty({
+    name: 'isFeatured',
+    nullable: true,
+    example: true,
+    required: false,
+    description: 'Whether the blog is featured or not',
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  isFeatured?: boolean;
+
+  @ApiProperty({
+    name: 'isPopular',
+    nullable: true,
+    required: false,
+    example: false,
+    description: 'Whether the blog is popular or not',
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  isPopular?: boolean;
+
+  @ApiProperty({
+    name: 'isTrending',
+    nullable: true,
+    required: false,
+    example: true,
+    description: 'Whether the blog is trending or not',
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  isTrending?: boolean;
+
   @ApiProperty({ example: 1, required: false })
   @Type(() => Number)
   @IsInt()

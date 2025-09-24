@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsObject } from 'class-validator';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateCmsDto {
   @ApiProperty({ example: 'page', description: 'Type/category of CMS entry' })
@@ -9,8 +9,8 @@ export class CreateCmsDto {
 
   @ApiProperty({ example: 'about-us', description: 'Unique slug identifier' })
   @IsString()
-  @IsNotEmpty()
-  slug!: string;
+  @IsOptional()
+  slug?: string;
 
   @ApiProperty({ example: 'About Us', description: 'Title of the CMS entry' })
   @IsString()

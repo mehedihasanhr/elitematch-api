@@ -8,6 +8,7 @@ import { CreateCmsDto } from './dto/create-cms.dto';
 import { UpdateCmsDto } from './dto/update-cms.dto';
 import { QueryCmsDto } from './dto/query-cms.dto';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import slugify from 'slugify';
 
 export interface PaginationMeta {
   total: number;
@@ -25,9 +26,18 @@ export class CmsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateCmsDto): Promise<Cms> {
-    const slug = this.normalizeSlug(dto.slug);
-    await this.ensureUniqueSlug(slug);
-    this.ensureJsonObject(dto.data);
+    let slug = slugify(dto.slug ?? dto.title, {
+      lower: true,
+      strict: true,
+    });
+
+    let counter = 1;
+    while (
+      await this.prisma.cms.findUnique({ where: { slug } }).catch(() => null)
+    ) {
+      slug = `${slug}-${counter++}`;
+    }
+
     return this.prisma.cms.create({
       data: {
         type: dto.type.trim(),
@@ -85,19 +95,12 @@ export class CmsService {
     const existing = await this.prisma.cms.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('CMS entry not found');
 
-    let slug: string | undefined;
-    if (dto.slug && dto.slug !== existing.slug) {
-      slug = this.normalizeSlug(dto.slug);
-      await this.ensureUniqueSlug(slug);
-    }
-
     if (dto.data !== undefined) this.ensureJsonObject(dto.data);
 
     return this.prisma.cms.update({
       where: { id },
       data: {
         ...(dto.type !== undefined && { type: dto.type.trim() }),
-        ...(slug !== undefined && { slug }),
         ...(dto.title !== undefined && { title: dto.title.trim() }),
         ...(dto.data !== undefined && {
           data: dto.data as Prisma.InputJsonValue,
@@ -127,19 +130,6 @@ export class CmsService {
       }
     }
     return where;
-  }
-
-  private async ensureUniqueSlug(slug: string) {
-    const existing = await this.prisma.cms.findUnique({ where: { slug } });
-    if (existing) throw new BadRequestException('slug already exists');
-  }
-
-  private normalizeSlug(slug: string): string {
-    return slug
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
   }
 
   private ensureJsonObject(value: unknown) {

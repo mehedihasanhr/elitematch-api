@@ -796,6 +796,9 @@ model Blog {
   id           Int           @id @default(autoincrement())
   title        String        @db.VarChar(255)
   slug         String        @unique @db.VarChar(255)
+  isFeatured   Boolean       @default(false) @map("is_featured")
+  isPopular    Boolean       @default(false) @map("is_popular")
+  isTrending   Boolean       @default(false) @map("is_trending")
   content      String        @db.Text
   authorId     Int           @map("author_id")
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
