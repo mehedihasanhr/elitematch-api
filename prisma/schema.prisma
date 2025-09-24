@@ -806,8 +806,8 @@ model Blog {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   isPublished  Boolean       @default(false) @map("is_published")
   publishedAt  DateTime?     @map("published_at")
-  coverImageId Int           @map("cover_image_id")
-  coverImage   File          @relation(fields: [coverImageId], references: [id])
+  coverImageId Int?          @map("cover_image_id")
+  coverImage   File?         @relation(fields: [coverImageId], references: [id])
   comments     Comment[]     @relation("BlogToComment")
   blogTags     BlogTag[]
   categoryId   Int?          @map("category_id")

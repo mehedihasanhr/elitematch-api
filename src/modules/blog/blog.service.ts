@@ -27,7 +27,7 @@ export class BlogService {
     file?: Express.Multer.File,
     authId?: number,
   ) {
-    let coverId: number | null = null;
+    let coverId: number | undefined = undefined;
 
     if (file) {
       const savedFile = await this.fileService.processAndSaveFile(file);
@@ -42,21 +42,41 @@ export class BlogService {
       slug = `${slug}-${counter++}`;
     }
 
-    const payload: Prisma.BlogUncheckedCreateInput = {
+    // ensure category exists
+    const category = await this.prisma.blogCategory.findUnique({
+      where: { id: data.categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    // if tags are provided, ensure they exist
+    if (data.tagIds && data.tagIds.length > 0) {
+      const tags = await this.prisma.blogTag.findMany({
+        where: { id: { in: data.tagIds } },
+      });
+
+      if (tags.length !== data.tagIds.length) {
+        throw new NotFoundException('One or more tags not found');
+      }
+    }
+
+    const payload = {
       title: data.title,
       slug,
       content: data.content,
-      authorId: authId,
+      author: { connect: { id: authId || undefined } },
       isPublished: data.isPublished ?? false,
       isFeatured: data.isFeatured ?? false,
       isPopular: data.isPopular ?? false,
       isTrending: data.isTrending ?? false,
-      categoryId: data.categoryId ?? null,
-      coverImageId: coverId,
+      category: { connect: { id: data.categoryId } },
+      coverImage: coverId ? { connect: { id: coverId } } : undefined,
       blogTags: data.tagIds
         ? { connect: data.tagIds.map((id) => ({ id })) }
         : undefined,
-    } as Prisma.BlogUncheckedCreateInput;
+    };
 
     const blog = await this.prisma.blog.create({ data: payload });
 
@@ -109,9 +129,11 @@ export class BlogService {
    * @throws NotFoundException if not found
    * @returns blog record
    */
-  async findOne(id: number) {
+  async findOne(idOrSlug: string) {
+    const parsedId = Number(idOrSlug);
+
     const item = await this.prisma.blog.findUnique({
-      where: { id },
+      where: { ...(isNaN(parsedId) ? { slug: idOrSlug } : { id: parsedId }) },
       include: {
         author: true,
         category: true,
@@ -192,13 +214,18 @@ export class BlogService {
     const existing = await this.prisma.blog.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Blog not found');
     // remove file usese  record
-    await this.prisma.fileUsage.deleteMany({
-      where: { model: 'blog', modelId: id, fileId: existing.coverImageId },
-    });
+
+    if (existing.coverImageId) {
+      await this.prisma.fileUsage.deleteMany({
+        where: { model: 'blog', modelId: id, fileId: existing.coverImageId },
+      });
+    }
 
     const deleted = await this.prisma.blog.delete({ where: { id } });
 
-    await this.fileService.removeExistingFile(existing.coverImageId);
+    if (existing.coverImageId) {
+      await this.fileService.removeExistingFile(existing.coverImageId);
+    }
     return deleted;
   }
 }

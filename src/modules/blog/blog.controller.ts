@@ -20,6 +20,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiConsumes,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
@@ -37,27 +38,15 @@ export class BlogController {
   /**
    * Create a new blog post
    */
-  @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create blog' })
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Blog Title' },
-        content: { type: 'string', example: 'Blog content...' },
-        authorId: { type: 'number', example: 1 },
-        isPublished: { type: 'boolean', example: true },
-        categoryId: { type: 'number', example: 1 },
-        coverImage: {
-          type: 'string',
-          format: 'binary',
-          description: 'Cover image file',
-        },
-      },
-    },
+    type: CreateBlogDto,
+    description: 'CreateBlogDto object with optional coverImage file',
   })
   @ApiResponse({ status: 201, description: 'Blog created' })
   @UseGuards(JwtAuthGuard)
@@ -78,11 +67,11 @@ export class BlogController {
     return this.service.findAll(page ?? 1, limit ?? 20);
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: Number })
-  @ApiOperation({ summary: 'Get blog by id' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  @Get(':idOrSlug')
+  @ApiParam({ name: 'idOrSlug', type: String, description: 'Blog ID or slug' })
+  @ApiOperation({ summary: 'Get blog by id or slug' })
+  findOne(@Param('idOrSlug') idOrSlug: string) {
+    return this.service.findOne(idOrSlug);
   }
 
   @Put(':id')
@@ -91,23 +80,7 @@ export class BlogController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOperation({ summary: 'Update blog' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Updated Blog Title' },
-        slug: { type: 'string', example: 'updated-blog-slug' },
-        content: { type: 'string', example: 'Updated blog content...' },
-        isPublished: { type: 'boolean', example: true },
-        categoryId: { type: 'number', example: 1 },
-        coverImage: {
-          type: 'string',
-          format: 'binary',
-          description: 'Cover image file (optional)',
-        },
-      },
-    },
-  })
+  @ApiBody({ type: UpdateBlogDto })
   @ApiResponse({ status: 200, description: 'Blog updated' })
   update(
     @Param('id', ParseIntPipe) id: number,
