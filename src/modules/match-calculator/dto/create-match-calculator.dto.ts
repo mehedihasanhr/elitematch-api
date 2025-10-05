@@ -47,7 +47,7 @@ export class CreateMatchCalculatorDto {
   })
   @IsEnum(MatchStage)
   @IsNotEmpty({ message: 'matchStage should not be empty' })
-  matchStage: MatchStage;
+  stage: MatchStage;
 
   @Type(() => Boolean)
   @IsBoolean()
