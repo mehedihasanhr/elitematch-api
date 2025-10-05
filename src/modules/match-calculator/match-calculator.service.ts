@@ -118,10 +118,25 @@ export class MatchCalculatorService {
   }
 
   /**
+   * Match Couple created by match makers
+   * @param id - ID of the match couple to retrieve
+   */
+  async findOneMatchCouple(id: number) {
+    const matchCouple = await this.prisma.matchCouple.findUnique({
+      where: { id },
+      include: {
+        matchMaker: { omit: { password: true } },
+        coupleA: { omit: { password: true } },
+        coupleB: { omit: { password: true } },
+      },
+    });
+    return matchCouple;
+  }
+
+  /**
    * Match created by match makers
    *
    * @param query - Query parameters for pagination and filtering
-   * @returns
    */
   async findAllMatchCouples(query?: Record<string, unknown>) {
     const page = query?.page ? Number(query.page) : 1;

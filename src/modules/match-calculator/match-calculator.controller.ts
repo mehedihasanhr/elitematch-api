@@ -87,6 +87,15 @@ export class MatchCalculatorController {
     return this.matchCalculatorService.findAllMatchCouples(query);
   }
 
+  @Get('/match-couples/:id')
+  @ApiOperation({
+    summary: 'Get match couple by ID',
+    description: 'Retrieves details of a specific match couple by ID.',
+  })
+  findOneMatchCouple(@Param('id', ParseIntPipe) id: number) {
+    return this.matchCalculatorService.findOneMatchCouple(id);
+  }
+
   /**
    * Updates a match couple by ID
    * @param id ID of the match couple to update
