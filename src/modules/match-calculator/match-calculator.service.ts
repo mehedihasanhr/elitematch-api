@@ -62,6 +62,89 @@ export class MatchCalculatorService {
   }
 
   /**
+   * Update match couple details
+   *
+   * @param id - ID of the match couple to update
+   * @param data - Data to update the match couple with
+   * @returns Updated match couple
+   */
+  async updateMatchCouple(id: number, data: Partial<CreateMatchCalculatorDto>) {
+    const matchCouple = await this.prisma.matchCouple.findUnique({
+      where: { id },
+    });
+
+    if (!matchCouple) {
+      throw new NotFoundException('Match couple not found');
+    }
+
+    const updatedMatchCouple = await this.prisma.matchCouple.update({
+      where: { id },
+      data,
+    });
+
+    return {
+      data: updatedMatchCouple,
+      message: 'Match couple updated successfully',
+      status: 'success',
+      statusCode: 200,
+    };
+  }
+
+  /**
+   * Delete a match couple by ID
+   *
+   * @param id - ID of the match couple to delete
+   * @returns Deleted match couple
+   */
+  async deleteMatchCouple(id: number) {
+    const matchCouple = await this.prisma.matchCouple.findUnique({
+      where: { id },
+    });
+
+    if (!matchCouple) {
+      throw new NotFoundException('Match couple not found');
+    }
+
+    await this.prisma.matchCouple.delete({
+      where: { id },
+    });
+
+    return {
+      data: matchCouple,
+      message: 'Match couple deleted successfully',
+      status: 'success',
+      statusCode: 200,
+    };
+  }
+
+  /**
+   * Match created by match makers
+   *
+   * @param query - Query parameters for pagination and filtering
+   * @returns
+   */
+  async findAllMatchCouples(query?: Record<string, unknown>) {
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 10;
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.matchCouple.findMany({
+        skip,
+        take: limit,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.matchCouple.count(),
+    ]);
+
+    return paginate(items, {
+      total,
+      page,
+      limit,
+    });
+  }
+
+  /**
    * Calculate the match score between two users based on their profiles.
    * @param userAId - The ID of the first user
    * @param userBId - The ID of the second user
