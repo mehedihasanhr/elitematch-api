@@ -133,6 +133,17 @@ export class MatchCalculatorService {
         skip,
         take: limit,
         orderBy: { id: 'asc' },
+        include: {
+          matchMaker: {
+            omit: { password: true },
+          },
+          coupleA: {
+            omit: { password: true },
+          },
+          coupleB: {
+            omit: { password: true },
+          },
+        },
       }),
       this.prisma.matchCouple.count(),
     ]);
