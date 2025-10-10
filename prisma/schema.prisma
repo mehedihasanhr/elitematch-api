@@ -95,6 +95,7 @@ model User {
   matchCouplesA                       MatchCouple[]                 @relation("CoupleA")
   matchCouplesB                       MatchCouple[]                 @relation("CoupleB")
   matchCouplesCreator                 MatchCouple[]                 @relation("MatchCoupleCreator")
+  rateMeetup                          RateMeetup[]
 
   @@map("users")
 }
@@ -181,6 +182,7 @@ model MatchCouple {
   updatedAt    DateTime    @updatedAt @map("updated_at")
   creatorId    Int         @map("creatorId")
   creator      User        @relation("MatchCoupleCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  meetup       Meetup[]
 
   @@index([matchMakerId], name: "idx_match_couple_match_maker_id")
   @@index([coupleAId], name: "idx_match_couple_couple_a_id")
@@ -789,6 +791,35 @@ model Ethnicity {
   updator   User     @relation("EthnicityUpdatedBy", fields: [updatedBy], references: [id], onDelete: Cascade)
 
   @@map("ethnicities")
+}
+
+model Meetup {
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  location      String       @db.VarChar(255)
+  date          DateTime
+  description   String?      @db.Text
+  matchCoupleId Int          @map("match_couple_id")
+  matchCouple   MatchCouple  @relation(fields: [matchCoupleId], references: [id], onDelete: Cascade)
+  rateMeetup    RateMeetup[]
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@map("meetups")
+}
+
+model RateMeetup {
+  id        Int      @id @default(autoincrement())
+  meetupId  Int      @map("meetup_id")
+  meetup    Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int      @db.SmallInt
+  review    String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("rate_meetups")
 }
 
 // Blog management

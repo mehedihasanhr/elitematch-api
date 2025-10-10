@@ -27,6 +27,8 @@ import { QuickLinkModule } from './modules/quick-link/quick-link.module';
 import { BlogTagModule } from './modules/blog-tag/blog-tag.module';
 import { RoleModule } from './modules/role-management/role/role.module';
 import { PermissionModule } from './modules/role-management/permission/permission.module';
+import { MeetupModule } from './modules/meetup/meetup.module';
+import { RateMeetupModule } from './modules/rate-meetup/rate-meetup.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { PermissionModule } from './modules/role-management/permission/permissio
     BlogTagModule,
     RoleModule,
     PermissionModule,
+    MeetupModule,
+    RateMeetupModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
