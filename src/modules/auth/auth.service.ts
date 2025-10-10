@@ -350,7 +350,15 @@ export class AuthService {
   private async userMap(userId: number) {
     return this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, firstName: true, lastName: true },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: {
+          include: { permissions: true },
+        },
+      },
     });
   }
 }
