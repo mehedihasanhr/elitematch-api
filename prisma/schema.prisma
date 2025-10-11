@@ -102,7 +102,7 @@ model User {
 
 model File {
   id           Int            @id @default(autoincrement())
-  originalName String         @map("original_name")
+  originalName String         @map("original_name") @db.Text
   mimeType     String
   fileSize     Int
   width        Int
@@ -119,8 +119,9 @@ model File {
   blogs        Blog[]
   logo         SiteMetadata[] @relation("LogoFile")
   favicon      SiteMetadata[] @relation("FaviconFile")
+  testimonials Testimonial[]
+  Story        Story[]
 
-  @@index([originalName], name: "idx_file_original_name")
   @@index([hash], name: "idx_file_hash")
   @@map("files")
 }
@@ -133,6 +134,7 @@ model FileUsage {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([fileId, model, modelId])
   @@index([fileId], name: "idx_file_usage_file_id")
   @@index([modelId], name: "idx_file_usage_model_id")
   @@map("file_usage")
@@ -1008,4 +1010,46 @@ model QuickLink {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("quick_links")
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  content     String   @db.Text
+  author      String   @default("Anonymous") @db.VarChar(255)
+  isActive    Boolean  @default(true) @map("is_active")
+  thumbnailId Int?     @map("thumbnail_id")
+  thumbnail   File?    @relation(fields: [thumbnailId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("testimonials")
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
+  subject   String   @db.VarChar(255)
+  message   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("contact_messages")
+}
+
+model Story {
+  id           Int      @id @default(autoincrement())
+  title        String   @db.VarChar(255)
+  slug         String   @unique @db.VarChar(255)
+  content      String   @db.Text
+  isPublished  Boolean  @default(false) @map("is_published")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  coverImageId Int?     @map("cover_image_id")
+  coverImage   File?    @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  @@map("stories")
 }

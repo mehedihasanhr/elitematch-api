@@ -29,6 +29,9 @@ import { RoleModule } from './modules/role-management/role/role.module';
 import { PermissionModule } from './modules/role-management/permission/permission.module';
 import { MeetupModule } from './modules/meetup/meetup.module';
 import { RateMeetupModule } from './modules/rate-meetup/rate-meetup.module';
+import { TestimonialModule } from './modules/testimonial/testimonial.module';
+import { ContactMessageModule } from './modules/contact-message/contact-message.module';
+import { StoryModule } from './modules/story/story.module';
 
 @Module({
   imports: [
@@ -65,6 +68,9 @@ import { RateMeetupModule } from './modules/rate-meetup/rate-meetup.module';
     PermissionModule,
     MeetupModule,
     RateMeetupModule,
+    TestimonialModule,
+    ContactMessageModule,
+    StoryModule,
   ],
   providers: [],
   // AuthService and AuthController are provided by AuthModule
