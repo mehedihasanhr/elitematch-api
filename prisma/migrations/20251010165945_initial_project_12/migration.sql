@@ -530,17 +530,47 @@ CREATE TABLE `ethnicities` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `meetups` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `location` VARCHAR(255) NOT NULL,
+    `date` DATETIME(3) NOT NULL,
+    `description` TEXT NULL,
+    `match_couple_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `rate_meetups` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `meetup_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `rating` SMALLINT NOT NULL,
+    `review` TEXT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `blogs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
     `slug` VARCHAR(255) NOT NULL,
+    `is_featured` BOOLEAN NOT NULL DEFAULT false,
+    `is_popular` BOOLEAN NOT NULL DEFAULT false,
+    `is_trending` BOOLEAN NOT NULL DEFAULT false,
     `content` TEXT NOT NULL,
     `author_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `is_published` BOOLEAN NOT NULL DEFAULT false,
     `published_at` DATETIME(3) NULL,
-    `cover_image_id` INTEGER NOT NULL,
+    `cover_image_id` INTEGER NULL,
     `category_id` INTEGER NULL,
 
     UNIQUE INDEX `blogs_slug_key`(`slug`),
@@ -1028,10 +1058,19 @@ ALTER TABLE `ethnicities` ADD CONSTRAINT `ethnicities_created_by_fkey` FOREIGN K
 ALTER TABLE `ethnicities` ADD CONSTRAINT `ethnicities_updated_by_fkey` FOREIGN KEY (`updated_by`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `meetups` ADD CONSTRAINT `meetups_match_couple_id_fkey` FOREIGN KEY (`match_couple_id`) REFERENCES `match_couples`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `rate_meetups` ADD CONSTRAINT `rate_meetups_meetup_id_fkey` FOREIGN KEY (`meetup_id`) REFERENCES `meetups`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `rate_meetups` ADD CONSTRAINT `rate_meetups_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `blogs` ADD CONSTRAINT `blogs_author_id_fkey` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `blogs` ADD CONSTRAINT `blogs_cover_image_id_fkey` FOREIGN KEY (`cover_image_id`) REFERENCES `files`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `blogs` ADD CONSTRAINT `blogs_cover_image_id_fkey` FOREIGN KEY (`cover_image_id`) REFERENCES `files`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `blogs` ADD CONSTRAINT `blogs_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
