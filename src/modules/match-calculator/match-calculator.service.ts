@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateMatchCalculatorDto } from './dto/create-match-calculator.dto';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
+import { CreateMatchCalculatorDto } from './dto/create-match-calculator.dto';
 
 @Injectable()
 export class MatchCalculatorService {
@@ -34,6 +34,10 @@ export class MatchCalculatorService {
     const page = query?.page ? Number(query.page) : 1;
     const limit = query?.limit ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
+    // const search =
+    //   typeof query?.search === 'string'
+    //     ? String(query.search).toLowerCase()
+    //     : null;
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
@@ -142,12 +146,48 @@ export class MatchCalculatorService {
     const page = query?.page ? Number(query.page) : 1;
     const limit = query?.limit ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
+    const search =
+      typeof query?.search === 'string'
+        ? String(query.search).trim().toLowerCase()
+        : null;
+
+    let where = {};
+
+    if (search) {
+      const terms = search.split(/\s+/); // split "super admin" → ["super", "admin"]
+
+      where = {
+        AND: terms.map((term) => ({
+          OR: [
+            {
+              coupleA: {
+                OR: [
+                  { firstName: { contains: term } },
+                  { lastName: { contains: term } },
+                  { email: { contains: term } },
+                ],
+              },
+            },
+            {
+              coupleB: {
+                OR: [
+                  { firstName: { contains: term } },
+                  { lastName: { contains: term } },
+                  { email: { contains: term } },
+                ],
+              },
+            },
+          ],
+        })),
+      };
+    }
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.matchCouple.findMany({
         skip,
         take: limit,
         orderBy: { id: 'asc' },
+        where,
         include: {
           matchMaker: {
             omit: { password: true },
@@ -160,7 +200,7 @@ export class MatchCalculatorService {
           },
         },
       }),
-      this.prisma.matchCouple.count(),
+      this.prisma.matchCouple.count({ where }),
     ]);
 
     return paginate(items, {

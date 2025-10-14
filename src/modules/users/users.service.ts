@@ -16,10 +16,23 @@ export class UsersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    console.log({ query });
+
     const where: Record<string, unknown> = {};
 
-    where['firstName'] = { contains: query.search };
-    where['lastName'] = { contains: query.search };
+    if (query.search && typeof query.search === 'string') {
+      const terms = query.search.trim().split(/\s+/);
+
+      where['AND'] = terms.map((term) => ({
+        OR: [
+          { firstName: { contains: term } },
+          { lastName: { contains: term } },
+          { email: { contains: term } },
+        ],
+      }));
+    }
+
+    console.log({ where });
 
     const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
@@ -41,9 +54,9 @@ export class UsersService {
             },
           },
         },
-        where: { ...where },
+        where,
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
 
     return paginate(users, { total, page, limit });

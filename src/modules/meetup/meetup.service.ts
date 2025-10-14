@@ -3,11 +3,11 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { paginate } from 'src/utils/paginate';
 import { CreateMeetupDto } from './dto/create-meetup.dto';
 import { UpdateMeetupDto } from './dto/update-meetup.dto';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-import { paginate } from 'src/utils/paginate';
 
 @Injectable()
 export class MeetupService {
@@ -46,6 +46,56 @@ export class MeetupService {
   async findAll(query: Record<string, any>) {
     const page = query.page ? parseInt(String(query.page), 10) : 1;
     const limit = query.limit ? parseInt(String(query.limit), 10) : 10;
+    const search =
+      typeof query?.search === 'string'
+        ? String(query.search).trim().toLowerCase()
+        : null;
+
+    let where = {};
+
+    // search by coupleA or coupleB firstName or lastName
+    if (search) {
+      where = {
+        OR: [
+          {
+            coupleMatch: {
+              select: {
+                coupleA: {
+                  select: {
+                    user: {
+                      where: {
+                        OR: [
+                          { firstName: { contains: search } },
+                          { lastName: { contains: search } },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            coupleMatch: {
+              select: {
+                coupleB: {
+                  select: {
+                    user: {
+                      where: {
+                        OR: [
+                          { firstName: { contains: search } },
+                          { lastName: { contains: search } },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+    }
 
     try {
       const [data, total] = await this.prisma.$transaction([
@@ -53,12 +103,26 @@ export class MeetupService {
           take: limit,
           skip: (page - 1) * limit,
           orderBy: { createdAt: 'desc' },
+          where,
+          include: {
+            matchCouple: {
+              include: {
+                coupleA: {
+                  select: { id: true, firstName: true, lastName: true },
+                },
+                coupleB: {
+                  select: { id: true, firstName: true, lastName: true },
+                },
+              },
+            },
+          },
         }),
-        this.prisma.meetup.count(),
+        this.prisma.meetup.count({ where }),
       ]);
 
       return paginate(data, { total, page, limit });
     } catch (err) {
+      console.log(err);
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2023') {
           throw new BadRequestException('Invalid query parameters');
