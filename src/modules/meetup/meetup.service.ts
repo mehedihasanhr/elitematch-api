@@ -55,46 +55,75 @@ export class MeetupService {
 
     // search by coupleA or coupleB firstName or lastName
     if (search) {
-      where = {
-        OR: [
-          {
-            coupleMatch: {
-              select: {
-                coupleA: {
-                  select: {
-                    user: {
-                      where: {
-                        OR: [
-                          { firstName: { contains: search } },
-                          { lastName: { contains: search } },
-                        ],
-                      },
-                    },
-                  },
-                },
-              },
+      const splitedSearch = search.split(' ');
+
+      const coupleUserSearch = (term: string) => ({
+        where: {
+          user: {
+            where: {
+              OR: [
+                { firstName: { contains: term } },
+                { lastName: { contains: term } },
+                { email: { contains: term } },
+              ],
             },
           },
-          {
-            coupleMatch: {
-              select: {
-                coupleB: {
-                  select: {
-                    user: {
-                      where: {
-                        OR: [
-                          { firstName: { contains: search } },
-                          { lastName: { contains: search } },
-                        ],
-                      },
-                    },
-                  },
-                },
-              },
+        },
+      });
+
+      splitedSearch.forEach((term) => {
+        where = {
+          coupleMatch: {
+            where: {
+              OR: [
+                { coupleA: coupleUserSearch(term) },
+                { coupleB: coupleUserSearch(term) },
+              ],
             },
           },
-        ],
-      };
+        };
+      });
+
+      // where = {
+      //   OR: [
+      //     {
+      //       coupleMatch: {
+      //         select: {
+      //           coupleA: {
+      //             select: {
+      //               user: {
+      //                 where: {
+      //                   OR: [
+      //                     { firstName: { contains: search } },
+      //                     { lastName: { contains: search } },
+      //                   ],
+      //                 },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //     {
+      //       coupleMatch: {
+      //         select: {
+      //           coupleB: {
+      //             select: {
+      //               user: {
+      //                 where: {
+      //                   OR: [
+      //                     { firstName: { contains: search } },
+      //                     { lastName: { contains: search } },
+      //                   ],
+      //                 },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   ],
+      // };
     }
 
     try {
