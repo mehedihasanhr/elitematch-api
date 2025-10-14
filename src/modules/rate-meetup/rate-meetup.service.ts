@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateRateMeetupDto } from './dto/create-rate-meetup.dto';
-import { UpdateRateMeetupDto } from './dto/update-rate-meetup.dto';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
-import { Prisma } from '@prisma/client';
+import { CreateRateMeetupDto } from './dto/create-rate-meetup.dto';
+import { UpdateRateMeetupDto } from './dto/update-rate-meetup.dto';
 
 @Injectable()
 export class RateMeetupService {
@@ -40,6 +40,7 @@ export class RateMeetupService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
+        include: { meetup: true },
       }),
       this.prisma.rateMeetup.count(),
     ]);
