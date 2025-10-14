@@ -35,6 +35,7 @@ export class MeetupController {
   @ApiOperation({ summary: 'Get all meetups with pagination' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
   findAll(@Query() query: Record<string, any>) {
     return this.meetupService.findAll(query);
   }

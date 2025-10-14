@@ -51,79 +51,40 @@ export class MeetupService {
         ? String(query.search).trim().toLowerCase()
         : null;
 
-    let where = {};
+    const where: Record<string, any> = {};
 
     // search by coupleA or coupleB firstName or lastName
     if (search) {
       const splitedSearch = search.split(' ');
 
-      const coupleUserSearch = (term: string) => ({
-        where: {
-          user: {
-            where: {
-              OR: [
-                { firstName: { contains: term } },
-                { lastName: { contains: term } },
-                { email: { contains: term } },
-              ],
-            },
+      const orCondition = splitedSearch.flatMap((term) => [
+        {
+          matchCouple: {
+            OR: [
+              {
+                coupleA: {
+                  OR: [
+                    { firstName: { contains: term } },
+                    { lastName: { contains: term } },
+                    { email: { contains: term } },
+                  ],
+                },
+              },
+              {
+                coupleB: {
+                  OR: [
+                    { firstName: { contains: term } },
+                    { lastName: { contains: term } },
+                    { email: { contains: term } },
+                  ],
+                },
+              },
+            ],
           },
         },
-      });
+      ]);
 
-      splitedSearch.forEach((term) => {
-        where = {
-          coupleMatch: {
-            where: {
-              OR: [
-                { coupleA: coupleUserSearch(term) },
-                { coupleB: coupleUserSearch(term) },
-              ],
-            },
-          },
-        };
-      });
-
-      // where = {
-      //   OR: [
-      //     {
-      //       coupleMatch: {
-      //         select: {
-      //           coupleA: {
-      //             select: {
-      //               user: {
-      //                 where: {
-      //                   OR: [
-      //                     { firstName: { contains: search } },
-      //                     { lastName: { contains: search } },
-      //                   ],
-      //                 },
-      //               },
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //     {
-      //       coupleMatch: {
-      //         select: {
-      //           coupleB: {
-      //             select: {
-      //               user: {
-      //                 where: {
-      //                   OR: [
-      //                     { firstName: { contains: search } },
-      //                     { lastName: { contains: search } },
-      //                   ],
-      //                 },
-      //               },
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   ],
-      // };
+      where.OR = orCondition;
     }
 
     try {
