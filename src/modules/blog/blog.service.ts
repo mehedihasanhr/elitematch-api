@@ -103,22 +103,39 @@ export class BlogService {
    * Retrieve all blog posts.
    * @returns Array of blog records
    */
-  async findAll(page = 1, limit = 20) {
-    const take = Math.max(1, Number(limit));
-    const currentPage = Math.max(1, Number(page));
+  async findAll(query: Record<string, string | string[]>) {
+    const limit = Number(query.limit || 10);
+    const take = Math.max(1, limit);
+    const currentPage = Math.max(1, Number(query.page || 1));
+    const isFeatured = this.checkIsBoolean(query.isFeatured as string);
+    const isPopular = this.checkIsBoolean(query.isPopular as string);
+    const isTrending = this.checkIsBoolean(query.isTrending as string);
 
-    const total = await this.prisma.blog.count();
-    const items = await this.prisma.blog.findMany({
-      skip: (currentPage - 1) * take,
-      take,
-      orderBy: { id: 'desc' },
-      include: {
-        author: true,
-        category: true,
-        coverImage: true,
-        blogTags: true,
-      },
-    });
+    const where: Record<string, unknown> = {};
+
+    if (isFeatured !== undefined) where['isFeatured'] = isFeatured;
+    if (isPopular !== undefined) where['isPopular'] = isPopular;
+    if (isTrending !== undefined) where['isTrending'] = isTrending;
+
+    if (query.search && typeof query.search === 'string') {
+      where['title'] = { contains: query.search };
+    }
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.blog.findMany({
+        skip: (currentPage - 1) * take,
+        take,
+        orderBy: { id: 'desc' },
+        where,
+        include: {
+          author: { select: { id: true, firstName: true, lastName: true } },
+          category: true,
+          coverImage: true,
+          blogTags: true,
+        },
+      }),
+      this.prisma.blog.count({ where }),
+    ]);
 
     return paginate(items, { total, page: currentPage, limit: take });
   }
@@ -228,4 +245,10 @@ export class BlogService {
     }
     return deleted;
   }
+
+  checkIsBoolean = (value: string): boolean | undefined => {
+    if (value === 'true' || value === '1') return true;
+    if (value === 'false' || value === '0') return false;
+    return undefined;
+  };
 }

@@ -1,34 +1,34 @@
 import {
-  Controller,
-  Post,
   Body,
-  Get,
-  Query,
-  Param,
-  Put,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
+  ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
+  ApiOperation,
   ApiParam,
   ApiQuery,
-  ApiConsumes,
-  ApiBearerAuth,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+import { multerOptions } from '../../cores/config/multer.conf';
+import { Auth } from '../auth/auth.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '../../cores/config/multer.conf';
-import { Auth } from '../auth/auth.decorator';
 
 @ApiTags('blogs')
 @Controller('blogs')
@@ -63,8 +63,8 @@ export class BlogController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of blogs' })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
-    return this.service.findAll(page ?? 1, limit ?? 20);
+  findAll(@Query() query: Record<string, any>) {
+    return this.service.findAll(query);
   }
 
   @Get(':idOrSlug')

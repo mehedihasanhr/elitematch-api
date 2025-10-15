@@ -21,7 +21,14 @@ export class CreateBlogDto {
   content: string;
 
   @ApiProperty({ example: false })
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    const v = String(value).toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(v)) return true;
+    if (['false', '0', 'no', 'off'].includes(v)) return false;
+    return Boolean(value);
+  })
   @IsBoolean()
   @IsOptional()
   isPublished?: boolean;
@@ -33,7 +40,14 @@ export class CreateBlogDto {
     required: false,
     description: 'Whether the blog is featured or not',
   })
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    const v = String(value).toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(v)) return true;
+    if (['false', '0', 'no', 'off'].includes(v)) return false;
+    return Boolean(value);
+  })
   @IsBoolean()
   @IsOptional()
   isFeatured?: boolean;
@@ -45,7 +59,14 @@ export class CreateBlogDto {
     example: false,
     description: 'Whether the blog is popular or not',
   })
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    const v = String(value).toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(v)) return true;
+    if (['false', '0', 'no', 'off'].includes(v)) return false;
+    return Boolean(value);
+  })
   @IsBoolean()
   @IsOptional()
   isPopular?: boolean;
@@ -57,7 +78,14 @@ export class CreateBlogDto {
     example: true,
     description: 'Whether the blog is trending or not',
   })
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    const v = String(value).toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(v)) return true;
+    if (['false', '0', 'no', 'off'].includes(v)) return false;
+    return Boolean(value);
+  })
   @IsBoolean()
   @IsOptional()
   isTrending?: boolean;

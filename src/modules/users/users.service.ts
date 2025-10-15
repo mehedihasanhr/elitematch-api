@@ -16,8 +16,6 @@ export class UsersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    console.log({ query });
-
     const where: Record<string, unknown> = {};
 
     if (query.search && typeof query.search === 'string') {
