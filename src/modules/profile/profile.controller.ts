@@ -10,6 +10,8 @@ import {
   Query,
   UploadedFiles,
   UseInterceptors,
+  Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import {
@@ -24,6 +26,8 @@ import { multerOptions } from '../../cores/config/multer.conf';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Auth } from '../auth/auth.decorator';
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -135,5 +139,19 @@ export class ProfileController {
   })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
+  }
+
+  @Patch(':id/unlock')
+  @ApiOperation({ summary: 'Unlock profile' })
+  @UseGuards(JwtAuthGuard)
+  @ApiParam({
+    name: 'id',
+    description: 'Profile ID to unlock',
+  })
+  async unlockProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Auth('id') userId: number,
+  ) {
+    await this.service.unlockProfile(id, userId);
   }
 }

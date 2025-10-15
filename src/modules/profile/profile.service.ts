@@ -311,4 +311,61 @@ export class ProfileService {
   async remove(id: number) {
     return this.prisma.profile.delete({ where: { id } });
   }
+
+  /**
+   * Unlock profile
+   * @param id - Numeric identifier of the profile to unlock.
+   * @param userId - User identifier of the user performing the unlock.
+   */
+  async unlockProfile(id: number, userId: number) {
+    // check user have active subscription
+    const activeSubscription = await this.prisma.subscription.findFirst({
+      where: {
+        userId,
+        AND: [{ endDate: { gte: new Date() } }, { isActive: true }],
+      },
+    });
+
+    if (!activeSubscription) {
+      throw new BadRequestException('No active subscription found');
+    }
+
+    if (activeSubscription.profileViewsLeft! <= 0) {
+      throw new BadRequestException(
+        'No profile views left in your subscription',
+      );
+    }
+
+    const profile = await this.prisma.unlockedProfile.create({
+      data: {
+        profile: { connect: { id } },
+        user: { connect: { id: userId } },
+        expiry: new Date(activeSubscription.endDate!),
+      },
+      include: {
+        profile: {
+          select: {
+            id: true,
+            user: {
+              select: { id: true, firstName: true, lastName: true },
+            },
+          },
+        },
+
+        user: {
+          select: { id: true, firstName: true, lastName: true },
+        },
+      },
+    });
+
+    // decrement profileViewsLeft
+    await this.prisma.subscription.update({
+      where: { id: activeSubscription.id },
+      data: { profileViewsLeft: { decrement: 1 } },
+    });
+
+    return {
+      data: profile,
+    };
+  }
 }

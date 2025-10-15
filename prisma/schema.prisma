@@ -96,6 +96,7 @@ model User {
   matchCouplesB                       MatchCouple[]                 @relation("CoupleB")
   matchCouplesCreator                 MatchCouple[]                 @relation("MatchCoupleCreator")
   rateMeetup                          RateMeetup[]
+  unlockedProfile                     UnlockedProfile[]
 
   @@map("users")
 }
@@ -281,6 +282,7 @@ model Profile {
   reasonsForUsing                     ReasonForUsing[]
   preferedDates                       PreferedDate[]
   loveLanguage                        LoveLanguage[]
+  unlockedProfile                     UnlockedProfile[]
 
   @@map("profiles")
 }
@@ -1052,4 +1054,15 @@ model Story {
   coverImage   File?    @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
 
   @@map("stories")
+}
+
+model UnlockedProfile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileId Int      @map("profile_id")
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  expiry    DateTime
+
+  @@map("unlocked_profiles")
 }
