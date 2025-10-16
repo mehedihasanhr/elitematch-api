@@ -3,12 +3,12 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { CreateTestimonialDto } from './dto/create-testimonial.dto';
-import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
-import { paginate } from 'src/utils/paginate';
 import { Prisma } from '@prisma/client';
 import { FileService } from 'src/cores/modules/file/file.service';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { paginate } from 'src/utils/paginate';
+import { CreateTestimonialDto } from './dto/create-testimonial.dto';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Injectable()
 export class TestimonialService {
@@ -89,16 +89,29 @@ export class TestimonialService {
   async findAll(query: Record<string, any>) {
     const page = query.page ? parseInt(String(query.page), 10) : 1;
     const limit = query.limit ? parseInt(String(query.limit), 10) : 10;
+    const isActive =
+      query.isActive === 'true'
+        ? true
+        : query.isActive === 'false'
+          ? false
+          : undefined;
+
+    let where = {};
+
+    if (typeof isActive === 'boolean') {
+      where = { ...where, isActive };
+    }
 
     try {
       const [testimonials, total] = await this.prisma.$transaction([
         this.prisma.testimonial.findMany({
           skip: (page - 1) * limit,
           take: limit,
+          where,
           orderBy: { createdAt: 'desc' },
           include: { thumbnail: true },
         }),
-        this.prisma.testimonial.count(),
+        this.prisma.testimonial.count({ where }),
       ]);
 
       return paginate(testimonials, { total, page, limit });

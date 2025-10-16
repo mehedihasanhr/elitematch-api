@@ -110,12 +110,14 @@ export class BlogService {
     const isFeatured = this.checkIsBoolean(query.isFeatured as string);
     const isPopular = this.checkIsBoolean(query.isPopular as string);
     const isTrending = this.checkIsBoolean(query.isTrending as string);
+    const isPublished = this.checkIsBoolean(query.isPublished as string);
 
     const where: Record<string, unknown> = {};
 
     if (isFeatured !== undefined) where['isFeatured'] = isFeatured;
     if (isPopular !== undefined) where['isPopular'] = isPopular;
     if (isTrending !== undefined) where['isTrending'] = isTrending;
+    if (isPublished !== undefined) where['isPublished'] = isPublished;
 
     if (query.search && typeof query.search === 'string') {
       where['title'] = { contains: query.search };
