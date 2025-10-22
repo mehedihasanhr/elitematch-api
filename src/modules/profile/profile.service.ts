@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { paginate } from 'src/utils/paginate';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
+import { FileService } from 'src/cores/modules/file/file.service';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { paginate } from 'src/utils/paginate';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { FileService } from 'src/cores/modules/file/file.service';
 
 @Injectable()
 export class ProfileService {
@@ -269,32 +269,131 @@ export class ProfileService {
    * @param data - DTO containing fields to update.
    * @returns The updated profile record.
    */
-  async update(id: number, data: UpdateProfileDto, file?: Express.Multer.File) {
-    const payload: Prisma.ProfileUncheckedUpdateInput =
-      {} as Prisma.ProfileUncheckedUpdateInput;
-    let newFileId: number | null = null;
-    if (file) {
-      const savedFile = await this.fileService.processAndSaveFile(file);
-      newFileId = savedFile.id;
+  async update(
+    id: number,
+    data: UpdateProfileDto,
+    files?: Express.Multer.File[],
+  ) {
+    const coverIds: number[] = [];
+
+    if (files) {
+      for (const file of files) {
+        const savedFile = await this.fileService.processAndSaveFile(file);
+        coverIds.push(savedFile.id);
+        await this.prisma.fileUsage.create({
+          data: {
+            fileId: savedFile.id,
+            model: 'profile',
+            modelId: id,
+          },
+        });
+      }
     }
-    if (newFileId !== null) {
-      // payload.avatarId = newFileId;
-    } else if (data.avatarId !== undefined) {
-      // payload.avatarId = data.avatarId;
-    }
-    if (data.occupationId !== undefined)
-      payload.occupationId = data.occupationId;
-    if (data.educationLevelId !== undefined)
-      payload.educationLevelId = data.educationLevelId;
-    if (data.incomeRangeId !== undefined)
-      payload.incomeRangeId = data.incomeRangeId;
-    if (data.relationshipStatusId !== undefined)
-      payload.relationshipStatusId = data.relationshipStatusId;
-    if (data.dateOfBirth !== undefined) {
-      payload.dateOfBirth = new Date(data.dateOfBirth);
-    }
-    if (data.bio !== undefined) payload.bio = data.bio;
-    if (data.city !== undefined) payload.city = data.city;
+
+    const payload: Prisma.ProfileUncheckedUpdateInput = {
+      ...(data.userId ? { userId: data.userId } : {}),
+      avatars: {
+        connect: coverIds.map((id) => ({ id })),
+      },
+      introductionVideoLink: data.introductionVideoLink,
+      dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+      occupationId: data.occupationId ?? undefined,
+      educationLevelId: data.educationLevelId ?? undefined,
+      incomeRangeId: data.incomeRangeId ?? undefined,
+      relationshipStatusId: data.relationshipStatusId ?? undefined,
+      gender: data.gender ?? undefined,
+      bio: data.bio ?? undefined,
+      city: data.city ?? undefined,
+      state: data.state ?? undefined,
+      zipCode: data.zipCode ?? undefined,
+      country: data.country ?? undefined,
+      height: data.height ?? undefined,
+      weight: data.weight ?? undefined,
+      noOfChildren: data.noOfChildren ?? undefined,
+      specificPartnerPreferences: data.specificPartnerPreferences ?? undefined,
+      expectationsFromMatchmaker: data.expectationsFromMatchmaker ?? undefined,
+      questionForMatchmaker: data.questionForMatchmaker ?? undefined,
+      pastRelationshipExperience: data.pastRelationshipExperience ?? undefined,
+      lessonsLearnedFromPastRelationships:
+        data.lessonsLearnedFromPastRelationships ?? undefined,
+      patternsToAvoidInRelationships:
+        data.patternsToAvoidInRelationships ?? undefined,
+      ethnicities: data.ethnicities
+        ? { connect: data.ethnicities.map((id) => ({ id })) }
+        : undefined,
+      religions: data.religions
+        ? { connect: data.religions.map((id) => ({ id })) }
+        : undefined,
+      partnerQualities: data.partnerQualities
+        ? { connect: data.partnerQualities.map((id) => ({ id })) }
+        : undefined,
+      backgroundPreferences: data.backgroundPreferences
+        ? { connect: data.backgroundPreferences.map((id) => ({ id })) }
+        : undefined,
+      physicalAttributes: data.physicalAttributes
+        ? { connect: data.physicalAttributes.map((id) => ({ id })) }
+        : undefined,
+      agePreferences: data.agePreferences
+        ? { connect: data.agePreferences.map((id) => ({ id })) }
+        : undefined,
+      lifeStyle: data.lifeStyle
+        ? { connect: data.lifeStyle.map((id) => ({ id })) }
+        : undefined,
+      coreValues: data.coreValues
+        ? { connect: data.coreValues.map((id) => ({ id })) }
+        : undefined,
+      socialActivities: data.socialActivities
+        ? { connect: data.socialActivities.map((id) => ({ id })) }
+        : undefined,
+      relocation: data.relocation
+        ? { connect: data.relocation.map((id) => ({ id })) }
+        : undefined,
+      relationshipExpectations: data.relationshipExpectations
+        ? { connect: data.relationshipExpectations.map((id) => ({ id })) }
+        : undefined,
+      idealRelationships: data.idealRelationships
+        ? { connect: data.idealRelationships.map((id) => ({ id })) }
+        : undefined,
+      relationshipTimeline: data.relationshipTimeline
+        ? { connect: data.relationshipTimeline.map((id) => ({ id })) }
+        : undefined,
+      familyAspirations: data.familyAspirations
+        ? { connect: data.familyAspirations.map((id) => ({ id })) }
+        : undefined,
+      personalityTraits: data.personalityTraits
+        ? { connect: data.personalityTraits.map((id) => ({ id })) }
+        : undefined,
+      personalInterests: data.personalInterests
+        ? { connect: data.personalInterests.map((id) => ({ id })) }
+        : undefined,
+      intellectualInterests: data.intellectualInterests
+        ? { connect: data.intellectualInterests.map((id) => ({ id })) }
+        : undefined,
+      wellnessInterests: data.wellnessInterests
+        ? { connect: data.wellnessInterests.map((id) => ({ id })) }
+        : undefined,
+      socialCircles: data.socialCircles
+        ? { connect: data.socialCircles.map((id) => ({ id })) }
+        : undefined,
+      luxuryAlignment: data.luxuryAlignment
+        ? { connect: data.luxuryAlignment.map((id) => ({ id })) }
+        : undefined,
+      allergies: data.allergies
+        ? { connect: data.allergies.map((id) => ({ id })) }
+        : undefined,
+      culturalFits: data.culturalFits
+        ? { connect: data.culturalFits.map((id) => ({ id })) }
+        : undefined,
+      loveLanguage: data.loveLanguage
+        ? { connect: data.loveLanguage.map((id) => ({ id })) }
+        : undefined,
+      preferedDates: data.preferedDates
+        ? { connect: data.preferedDates.map((id) => ({ id })) }
+        : undefined,
+      reasonsForUsing: data.reasonsForUsing
+        ? { connect: data.reasonsForUsing.map((id) => ({ id })) }
+        : undefined,
+    };
 
     return this.prisma.profile.update({ where: { id }, data: payload });
   }
@@ -366,6 +465,60 @@ export class ProfileService {
 
     return {
       data: profile,
+    };
+  }
+
+  /**
+   *
+   * @param id - Numeric identifier of the profile to unlock.
+   * @param userId - User identifier of the user performing the unlock.
+   */
+  async deleteProfileFile(userId: number, fileId: number) {
+    // get profile
+    const profile = await this.prisma.profile.findFirst({
+      where: { userId },
+      include: { avatars: true },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const isFileAssociated = profile.avatars.some(
+      (avatar) => avatar.id === fileId,
+    );
+
+    if (!isFileAssociated) {
+      throw new NotFoundException('File not associated with the user profile');
+    }
+
+    // remove association
+    await this.prisma.profile.update({
+      where: { id: profile.id },
+      data: {
+        avatars: {
+          disconnect: { id: fileId },
+        },
+      },
+    });
+
+    // delete file usage record
+    await this.prisma.fileUsage.deleteMany({
+      where: {
+        fileId,
+        model: 'profile',
+        modelId: profile.id,
+      },
+    });
+
+    // optionally delete the file
+    await this.fileService.removeExistingFile(fileId);
+
+    return {
+      message: 'File deleted successfully',
+      status: 'success',
+      data: null,
+      statusCode: 200,
     };
   }
 }

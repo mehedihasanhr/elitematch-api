@@ -5,13 +5,13 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
   UploadedFiles,
-  UseInterceptors,
-  Patch,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import {
@@ -23,11 +23,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { multerOptions } from '../../cores/config/multer.conf';
+import { Auth } from '../auth/auth.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Auth } from '../auth/auth.decorator';
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -103,6 +103,7 @@ export class ProfileController {
   }
 
   @Put(':id')
+  @UseInterceptors(FilesInterceptor('avatars', 10, multerOptions))
   @ApiOperation({ summary: 'Update profile' })
   @ApiParam({
     name: 'id',
@@ -118,8 +119,12 @@ export class ProfileController {
     status: 404,
     description: 'Profile not found',
   })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProfileDto) {
-    return this.service.update(id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProfileDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.service.update(id, dto, files);
   }
 
   @Delete(':id')
@@ -153,5 +158,23 @@ export class ProfileController {
     @Auth('id') userId: number,
   ) {
     await this.service.unlockProfile(id, userId);
+  }
+
+  @Delete(':id/avatar/:avatarId')
+  @ApiOperation({ summary: 'Delete profile avatar' })
+  @UseGuards(JwtAuthGuard)
+  @ApiParam({
+    name: 'id',
+    description: 'Profile ID',
+  })
+  @ApiParam({
+    name: 'avatarId',
+    description: 'Avatar ID',
+  })
+  async removeAvatar(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('avatarId', ParseIntPipe) avatarId: number,
+  ) {
+    return this.service.deleteProfileFile(id, avatarId);
   }
 }
