@@ -97,6 +97,9 @@ model User {
   matchCouplesCreator                 MatchCouple[]                 @relation("MatchCoupleCreator")
   rateMeetup                          RateMeetup[]
   unlockedProfile                     UnlockedProfile[]
+  messageSender                       Message[]                     @relation("MessageSender")
+  messageReceiver                     Message[]                     @relation("MessageReceiver")
+  chats                               Chat[]
 
   @@map("users")
 }
@@ -936,9 +939,8 @@ model Subscription {
   planId           Int       @map("plan_id") // subscription plan id
   startDate        DateTime  @default(now()) @map("start_date")
   endDate          DateTime? @map("end_date")
-  profileViewsLeft Int?      @default(0) @map("profile_views_left")
-  messagesLeft     Int?      @default(0) @map("messages_left")
-  videoCallsLeft   Int?      @default(0) @map("video_calls_left")
+  profileViewsLeft Int       @default(0) @map("profiles_viewed")
+  messagesLeft     Int       @default(0) @map("message_left")
   isActive         Boolean   @default(true) @map("is_active")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
@@ -1065,4 +1067,32 @@ model UnlockedProfile {
   expiry    DateTime
 
   @@map("unlocked_profiles")
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  users     User[]
+  messages  Message[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("chats")
+}
+
+model Message {
+  id         Int     @id @default(autoincrement())
+  chatId     String  @map("chat_id")
+  chat       Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId   Int     @map("sender_id")
+  sender     User    @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId Int     @map("receiver_id")
+  receiver   User    @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  isSeen     Boolean @default(false) @map("is_seen")
+  delivered  Boolean @default(false)
+  content    String  @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("messages")
 }

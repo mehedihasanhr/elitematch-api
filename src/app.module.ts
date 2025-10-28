@@ -32,6 +32,8 @@ import { RateMeetupModule } from './modules/rate-meetup/rate-meetup.module';
 import { TestimonialModule } from './modules/testimonial/testimonial.module';
 import { ContactMessageModule } from './modules/contact-message/contact-message.module';
 import { StoryModule } from './modules/story/story.module';
+import { ChatsModule } from './modules/chats/chats.module';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -71,8 +73,9 @@ import { StoryModule } from './modules/story/story.module';
     TestimonialModule,
     ContactMessageModule,
     StoryModule,
+    ChatsModule,
+    MessageModule,
   ],
-  providers: [],
   // AuthService and AuthController are provided by AuthModule
 })
 export class AppModule {}
