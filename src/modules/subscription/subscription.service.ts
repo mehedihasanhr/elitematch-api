@@ -3,6 +3,7 @@ import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { StripeService } from 'src/cores/modules/stripe/stripe.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { PaymentProvider } from '@prisma/client';
+import Stripe from 'stripe';
 
 @Injectable()
 export class SubscriptionService {
@@ -66,5 +67,28 @@ export class SubscriptionService {
           message: 'Unsupported payment provider',
         });
     }
+  }
+
+  /**
+   * Stripe webhook handler
+   */
+  async handleStripeWebhook(payload: Buffer, sig: string) {
+    const event = this.stripeService.webhookEvent(payload, sig);
+    if (!event)
+      throw new BadRequestException({ message: 'Invalid Stripe webhook' });
+
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await this.handleCheckoutSessionCompleted(event.data.object);
+    }
+  }
+
+  /**
+   * Handle Stripe checkout session completed event
+   * @param session - The Stripe checkout session object
+   */
+  handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+    console.log('Checkout session completed:', session);
+    return null;
   }
 }

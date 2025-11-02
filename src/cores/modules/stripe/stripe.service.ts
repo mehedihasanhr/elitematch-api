@@ -6,6 +6,12 @@ import { PaymentProvider } from '@prisma/client';
 @Injectable()
 export class StripeService {
   private logger = new Logger(StripeService.name);
+  private stripe: Stripe;
+  private config: {
+    apiVersion: Stripe.LatestApiVersion;
+    apiKey: string;
+    webhookSecret: string;
+  };
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -22,6 +28,13 @@ export class StripeService {
 
     const apiVersion = (credentials.version ||
       '2025-08-27.basil') as Stripe.LatestApiVersion;
+
+    this.config = {
+      apiVersion,
+      apiKey: credentials.secretApiKey,
+      webhookSecret: credentials.webhookSecret || '',
+    };
+
     return new Stripe(credentials.secretApiKey, { apiVersion });
   }
 
@@ -117,5 +130,25 @@ export class StripeService {
     }
 
     return { session, url: session.url };
+  }
+
+  // webhook handler can be added here
+  webhookEvent(payload: Buffer, sig: string) {
+    const webhookSecret = this.config.webhookSecret;
+    if (!webhookSecret) {
+      this.logger.error('Stripe webhook secret not configured.');
+      return;
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = this.stripe.webhooks.constructEvent(payload, sig, webhookSecret);
+    } catch (err) {
+      this.logger.error('Error verifying Stripe webhook signature:', err);
+      throw new Error('Webhook verification failed');
+    }
+
+    return event;
   }
 }
