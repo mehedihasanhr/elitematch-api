@@ -1,37 +1,61 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { StripeService } from 'src/cores/modules/stripe/stripe.service';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { PaymentProvider } from '@prisma/client';
 
 @Injectable()
 export class SubscriptionService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly stripe: StripeService,
+    private readonly stripeService: StripeService,
   ) {}
 
-  async getStripeSubscriptionIntent(
-    dto: CreateCheckoutSessionDto,
-    userId?: number,
-  ) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+  /**
+   * Create a subscription checkout session
+   *  @param data - The subscription creation data
+   *  @param authId - The authenticated user ID
+   */
+  async create(data: CreateSubscriptionDto, authId?: number) {
+    const { provider, planId } = data;
+
+    if (!authId) throw new BadRequestException({ message: 'Unauthorized' });
+
+    const planDetails = await this.prisma.subscriptionPlan.findUnique({
+      where: { id: planId },
     });
 
-    if (!user) {
-      throw new UnauthorizedException({ message: 'User not found' });
+    // throw error if planDetails is null
+    if (!planDetails)
+      throw new BadRequestException({ message: 'Invalid plan ID' });
+
+    switch (provider) {
+      case PaymentProvider.STRIPE: {
+        const price = await this.stripeService.createSubscriptionPrice({
+          productId: planDetails.id.toString(),
+          currency: 'usd',
+          unitAmount: planDetails.price * 100,
+          interval: 'month',
+        });
+
+        const checkoutSession =
+          await this.stripeService.createSubscriptionCheckoutSession({
+            priceId: price.id,
+            userId: authId,
+            successUrl: data.successUrl,
+            cancelUrl: data.cancelUrl,
+            metadata: {
+              planId: planId.toString(),
+              userId: authId.toString(),
+            },
+          });
+
+        return checkoutSession;
+      }
+      default:
+        throw new BadRequestException({
+          message: 'Unsupported payment provider',
+        });
     }
-
-    const customer = await this.stripe.getOrCreateCustomer(user.id, user.email);
-
-    const session = await this.stripe.createCheckoutSession({
-      mode: dto.mode,
-      priceId: dto.priceId,
-      lineItems: dto.lineItems,
-      successUrl: `${dto.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: dto.cancelUrl,
-      customerId: customer.id,
-    });
-    return { id: session.id, url: session.url };
   }
 }

@@ -2,10 +2,14 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { MessageGateway } from './message.gateway';
 
 @Injectable()
 export class MessageService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gateway: MessageGateway,
+  ) {}
 
   /**
    * Create a new message
@@ -47,7 +51,28 @@ export class MessageService {
         },
       });
 
-      // TODO: broadcast message to receiver via websocket
+      // decrement messagesLeft on subscription (if present)
+      if (subscription && typeof subscription.messagesLeft === 'number') {
+        try {
+          await this.prisma.subscription.update({
+            where: { id: subscription.id },
+            data: { messagesLeft: Math.max(0, subscription.messagesLeft - 1) },
+          });
+        } catch {
+          // non-fatal: continue
+        }
+      }
+
+      // Broadcast message to receiver via websocket (if connected)
+      try {
+        this.gateway.sendToUser(
+          createMessageDto.receiverId,
+          'message:new',
+          message,
+        );
+      } catch {
+        // ignore gateway errors (will still return created message)
+      }
 
       return message;
     } catch (error) {
@@ -70,6 +95,112 @@ export class MessageService {
    */
   findAll() {
     return `This action returns all message`;
+  }
+
+  /**
+   * Get messages for a chat. Validates the authenticated user is a member
+   * and marks unread messages addressed to the user as seen.
+   */
+  async findByChat(chatId: string, authId?: number, page = 1, limit = 50) {
+    if (!authId) throw new BadRequestException('User not authenticated');
+
+    // ensure chat exists and user is a member
+    const chat = await this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { users: true },
+    });
+
+    if (!chat) throw new BadRequestException('Chat not found');
+
+    const member = chat.users.some((u) => u.id === authId);
+    if (!member) throw new BadRequestException('Not a member of this chat');
+
+    // fetch messages with pagination, ordered ascending by createdAt
+    const skip = Math.max(0, (page - 1) * limit);
+    const messages = await this.prisma.message.findMany({
+      where: { chatId },
+      orderBy: { createdAt: 'asc' },
+      skip,
+      take: limit,
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarId: true,
+          },
+        },
+      },
+    });
+
+    // mark unread messages addressed to authId as seen
+    const unreadIds = messages
+      .filter((m) => m.receiverId === authId && !m.isSeen)
+      .map((m) => m.id);
+
+    let updated = 0;
+    if (unreadIds.length > 0) {
+      const res = await this.prisma.message.updateMany({
+        where: { id: { in: unreadIds } },
+        data: { isSeen: true },
+      });
+      updated = res.count ?? 0;
+
+      // notify other chat members that messages were seen
+      const otherUsers = chat.users
+        .filter((u) => u.id !== authId)
+        .map((u) => u.id);
+      for (const uid of otherUsers) {
+        try {
+          this.gateway.sendToUser(uid, 'message:seen', {
+            chatId,
+            seenBy: authId,
+          });
+        } catch {
+          /* ignore gateway errors */
+        }
+      }
+    }
+
+    return { messages, markedSeen: updated };
+  }
+
+  /**
+   * Mark all unseen messages for authenticated user in a chat as seen
+   */
+  async markChatAsSeen(chatId: string, authId?: number) {
+    if (!authId) throw new BadRequestException('User not authenticated');
+
+    const chat = await this.prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { users: true },
+    });
+    if (!chat) throw new BadRequestException('Chat not found');
+    const member = chat.users.some((u) => u.id === authId);
+    if (!member) throw new BadRequestException('Not a member of this chat');
+
+    const res = await this.prisma.message.updateMany({
+      where: { chatId, receiverId: authId, isSeen: false },
+      data: { isSeen: true },
+    });
+
+    // notify other members
+    const otherUsers = chat.users
+      .filter((u) => u.id !== authId)
+      .map((u) => u.id);
+    for (const uid of otherUsers) {
+      try {
+        this.gateway.sendToUser(uid, 'message:seen', {
+          chatId,
+          seenBy: authId,
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    return { updated: res.count ?? 0 };
   }
 
   /**

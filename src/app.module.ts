@@ -12,7 +12,6 @@ import { MailModule } from './cores/modules/mail/mail.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SubscriptionPlanModule } from './modules/subscription-plan/subscription-plan.module';
-import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { StripeModule } from './cores/modules/stripe/stripe.module';
 import { UsersModule } from './modules/users/users.module';
 import { MatchMakersModule } from './modules/match-makers/match-makers.module';
@@ -34,6 +33,8 @@ import { ContactMessageModule } from './modules/contact-message/contact-message.
 import { StoryModule } from './modules/story/story.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { MessageModule } from './modules/message/message.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { MessageModule } from './modules/message/message.module';
     StoryModule,
     ChatsModule,
     MessageModule,
+    SettingsModule,
   ],
   // AuthService and AuthController are provided by AuthModule
 })

@@ -1,36 +1,21 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { ApiOperation } from '@nestjs/swagger';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { Auth } from '../auth/auth.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('subscription')
 @Controller('subscription')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 
-  @Post('/checkout-session')
-  @ApiOperation({
-    summary: 'Create a checkout session for subscription',
-  })
-  @ApiBearerAuth('JWT-auth')
-  @UseGuards(AuthGuard('jwt'))
-  @HttpCode(HttpStatus.OK)
-  @ApiBody({
-    type: CreateCheckoutSessionDto,
-  })
-  async createCheckoutSession(
-    @Body() dto: CreateCheckoutSessionDto,
-    @Auth('id') userId: number,
+  @Post('/session')
+  @ApiOperation({ summary: 'Create a subscription checkout session' })
+  @UseGuards(JwtAuthGuard)
+  async createSubscriptionSession(
+    @Body() data: CreateSubscriptionDto,
+    @Auth('id') authId: number,
   ) {
-    return this.subscriptionService.getStripeSubscriptionIntent(dto, userId);
+    return this.subscriptionService.create(data, authId);
   }
 }

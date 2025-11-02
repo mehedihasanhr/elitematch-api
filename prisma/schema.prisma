@@ -1096,3 +1096,26 @@ model Message {
 
   @@map("messages")
 }
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  SQUARE
+  OTHER
+}
+
+model PaymentConfig {
+  id            Int             @id @default(autoincrement())
+  provider      PaymentProvider @map("provider")
+  secretApiKey  String          @map("secret_api_key") @db.VarChar(300)
+  publicApiKey  String?         @map("public_api_key") @db.VarChar(300)
+  webhookSecret String?         @map("webhook_secret") @db.VarChar(300)
+  version       String?         @map("version") @db.VarChar(50)
+  isActive      Boolean         @default(true) @map("is_active")
+  mode          String?         @db.VarChar(50)
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@unique([provider])
+  @@map("payment_configs")
+}
