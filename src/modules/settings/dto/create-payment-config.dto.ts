@@ -12,14 +12,14 @@ export class CreatePaymentConfigDto {
   provider: PaymentProvider;
 
   @ApiProperty({
-    example: '4eC39HqLyjWDarjtT1zdp7dc',
+    example: 'secret Api key',
     description: 'The API key for the payment provider',
   })
   @IsString()
   secretApiKey: string;
 
   @ApiProperty({
-    example: '4eC39HqLyjWDarjtT1zdp7dc',
+    example: 'public api key',
     description: 'The Public API key for the payment provider',
   })
   @IsString()
@@ -27,7 +27,7 @@ export class CreatePaymentConfigDto {
   publicApiKey: string;
 
   @ApiProperty({
-    example: 'whsec_xxx',
+    example: 'webhook secret',
     description: 'The webhook secret for the payment provider',
   })
   @IsString()
