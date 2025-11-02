@@ -16,15 +16,27 @@ export class CreateSubscriptionDto {
   @IsNotEmpty({ message: 'Payment provider must not be empty' })
   provider: PaymentProvider;
 
+  @ApiProperty({
+    example: 1,
+    description: 'The ID of the subscription plan',
+  })
   @ToNumber()
   @IsNumber()
   @IsNotEmpty({ message: 'Subscription plan ID must not be empty' })
   planId: number;
 
+  @ApiProperty({
+    example: 'https://example.com/success',
+    description: 'The URL to redirect to upon successful subscription',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Success URL must not be empty' })
   successUrl: string;
 
+  @ApiProperty({
+    example: 'https://example.com/cancel',
+    description: 'The URL to redirect to if the subscription is cancelled',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Cancel URL must not be empty' })
   cancelUrl: string;

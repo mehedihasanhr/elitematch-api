@@ -51,7 +51,7 @@ export class StripeService {
 
   // Create a subscription price dynamically
   async createSubscriptionPrice(params: {
-    productId: string;
+    planName: string;
     unitAmount: number; // in cents
     currency: string;
     interval?: 'day' | 'week' | 'month' | 'year';
@@ -62,12 +62,14 @@ export class StripeService {
     const stripe = await this.initStripe();
 
     const price = await stripe.prices.create({
-      product: params.productId,
       unit_amount: params.unitAmount,
       currency: params.currency,
       recurring: {
         interval: params.interval || 'month',
         interval_count: params.intervalCount || 1,
+      },
+      product_data: {
+        name: params.planName || 'Subscription Plan',
       },
       nickname: params.nickname,
       metadata: params.metadata,
@@ -89,8 +91,15 @@ export class StripeService {
 
     let customerId = params.customerId;
     if (!customerId) {
-      const customer = await this.getOrCreateCustomer(params.userId);
+      const customer = await this.getOrCreateCustomer(
+        params.userId,
+        params?.metadata?.userEmail,
+      );
       customerId = customer.id;
+      await this.prisma.user.update({
+        where: { id: params.userId },
+        data: { skCustomerId: customerId },
+      });
     }
 
     const session = await stripe.checkout.sessions.create({

@@ -29,13 +29,20 @@ export class SubscriptionService {
     if (!planDetails)
       throw new BadRequestException({ message: 'Invalid plan ID' });
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: authId },
+    });
+
     switch (provider) {
       case PaymentProvider.STRIPE: {
         const price = await this.stripeService.createSubscriptionPrice({
-          productId: planDetails.id.toString(),
+          planName: planDetails.name,
           currency: 'usd',
           unitAmount: planDetails.price * 100,
           interval: 'month',
+          metadata: {
+            planId: planId.toString(),
+          },
         });
 
         const checkoutSession =
@@ -44,9 +51,11 @@ export class SubscriptionService {
             userId: authId,
             successUrl: data.successUrl,
             cancelUrl: data.cancelUrl,
+            customerId: user?.skCustomerId || undefined,
             metadata: {
               planId: planId.toString(),
               userId: authId.toString(),
+              userEmail: user?.email || '',
             },
           });
 
