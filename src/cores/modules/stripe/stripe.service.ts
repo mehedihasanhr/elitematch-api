@@ -34,8 +34,8 @@ export class StripeService {
       apiKey: credentials.secretApiKey,
       webhookSecret: credentials.webhookSecret || '',
     };
-
-    return new Stripe(credentials.secretApiKey, { apiVersion });
+    this.stripe = new Stripe(credentials.secretApiKey, { apiVersion });
+    return this.stripe;
   }
 
   // Create or get a Stripe customer
@@ -133,8 +133,13 @@ export class StripeService {
   }
 
   // webhook handler can be added here
-  webhookEvent(payload: Buffer, sig: string) {
+  async webhookEvent(payload: string, sig: string) {
+    if (!this.stripe) {
+      await this.initStripe();
+    }
+
     const webhookSecret = this.config.webhookSecret;
+
     if (!webhookSecret) {
       this.logger.error('Stripe webhook secret not configured.');
       return;

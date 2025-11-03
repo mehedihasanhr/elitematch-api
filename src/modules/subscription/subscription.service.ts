@@ -72,14 +72,17 @@ export class SubscriptionService {
   /**
    * Stripe webhook handler
    */
-  async handleStripeWebhook(payload: Buffer, sig: string) {
-    const event = this.stripeService.webhookEvent(payload, sig);
+  async handleStripeWebhook(payload: string, sig: string) {
+    const event = await this.stripeService.webhookEvent(payload, sig);
     if (!event)
       throw new BadRequestException({ message: 'Invalid Stripe webhook' });
 
     switch (event.type) {
       case 'checkout.session.completed':
         await this.handleCheckoutSessionCompleted(event.data.object);
+        break;
+      default:
+        break;
     }
   }
 
@@ -87,8 +90,21 @@ export class SubscriptionService {
    * Handle Stripe checkout session completed event
    * @param session - The Stripe checkout session object
    */
-  handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-    console.log('Checkout session completed:', session);
-    return null;
+  async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+    const { metadata } = session;
+    if (!metadata) return;
+    const userId = parseInt(metadata.userId || '0', 10);
+    const planId = parseInt(metadata.planId || '0', 10);
+
+    const plan = await this.prisma.subscriptionPlan.findUnique({
+      where: { id: planId },
+    });
+
+    // TODO: Need to implement subscription record creation or update
+    if (session.payment_status === 'paid' && plan) {
+      // create or update subscription record
+      console.log(`User ${userId} subscribed to plan ${plan.name}`);
+    }
+    return;
   }
 }
