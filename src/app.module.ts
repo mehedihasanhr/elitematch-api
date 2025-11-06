@@ -35,6 +35,7 @@ import { ChatsModule } from './modules/chats/chats.module';
 import { MessageModule } from './modules/message/message.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { NotificationGateway } from './cores/modules/notification/notification.gateway';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     MessageModule,
     SettingsModule,
   ],
+  providers: [NotificationGateway],
   // AuthService and AuthController are provided by AuthModule
 })
 export class AppModule {}

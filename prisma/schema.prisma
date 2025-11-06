@@ -921,9 +921,9 @@ model SubscriptionPlan {
   duration    Int     @default(30) @map("duration_days") // Duration in days
 
   // usage limits
-  maxProfileView   Int?    @default(1) @map("max_profile_view")
-  maxMessages      Int?    @default(1) @map("max_messages")
-  maxVideoCallMake Int?    @default(1) @map("max_video_call_make")
+  maxProfileView   Int     @default(1) @map("max_profile_view")
+  maxMessages      Int     @default(1) @map("max_messages")
+  maxVideoCallMake Int     @default(1) @map("max_video_call_make")
   matchMakerAccess Boolean @map("match_maker_access")
   isActive         Boolean @default(true) @map("is_active")
 
@@ -1119,4 +1119,41 @@ model PaymentConfig {
 
   @@unique([provider])
   @@map("payment_configs")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  metadata  Json?
+  type      String   @db.VarChar(100) // payment, user_activity, system_alert, etc.
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  recipients NotificationRecipient[]
+
+  @@map("notifications")
+}
+
+model NotificationRecipient {
+  id             Int       @id @default(autoincrement())
+  notificationId Int
+  userId         String    @db.VarChar(255)
+  read           Boolean   @default(false)
+  readAt         DateTime?
+
+  notification Notification @relation(fields: [notificationId], references: [id])
+
+  @@unique([notificationId, userId])
+  @@map("notification_recipients")
+}
+
+model MailConfig {
+  id       Int    @id @default(autoincrement())
+  host     String @db.VarChar(255)
+  port     Int
+  password String @db.VarChar(255)
+  user     String @db.VarChar(255)
+
+  @@map("mail_configs")
 }

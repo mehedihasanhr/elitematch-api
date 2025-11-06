@@ -5,13 +5,17 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter | null = null;
   private readonly logger = new Logger(MailService.name);
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   /**
    * Compile an HTML template with Handlebars.
@@ -37,11 +41,19 @@ export class MailService {
    */
   private async initTransporter() {
     if (this.transporter) return; // already initialized
+    const mailConfig = await this.prisma.mailConfig.findFirst();
 
-    const host = this.config.get<string>('EMAIL_HOST');
-    const port = this.config.get<number>('EMAIL_PORT');
-    const user = this.config.get<string>('EMAIL_USER');
-    const pass = this.config.get<string>('EMAIL_PASSWORD');
+    let host = this.config.get<string>('EMAIL_HOST');
+    let port = this.config.get<number>('EMAIL_PORT');
+    let user = this.config.get<string>('EMAIL_USER');
+    let pass = this.config.get<string>('EMAIL_PASSWORD');
+
+    if (mailConfig) {
+      host = mailConfig.host;
+      port = mailConfig.port;
+      user = mailConfig.user;
+      pass = mailConfig.password;
+    }
 
     const transportOptions: SMTPTransport.Options & {
       pool?: boolean;

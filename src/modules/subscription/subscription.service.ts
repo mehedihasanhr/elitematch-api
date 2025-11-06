@@ -4,12 +4,14 @@ import { StripeService } from 'src/cores/modules/stripe/stripe.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { PaymentProvider } from '@prisma/client';
 import Stripe from 'stripe';
+import { SubscriptionGateway } from './subscription.gateway';
 
 @Injectable()
 export class SubscriptionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stripeService: StripeService,
+    private readonly gateway: SubscriptionGateway,
   ) {}
 
   /**
@@ -100,10 +102,29 @@ export class SubscriptionService {
       where: { id: planId },
     });
 
-    // TODO: Need to implement subscription record creation or update
+    if (!userId || !planId || !plan) return;
+
     if (session.payment_status === 'paid' && plan) {
-      // create or update subscription record
-      console.log(`User ${userId} subscribed to plan ${plan.name}`);
+      // create subscription record in the database
+      const subscribed = await this.prisma.subscription.create({
+        data: {
+          userId,
+          planId,
+          startDate: new Date(),
+          endDate: new Date(session.expires_at),
+          profileViewsLeft: plan.maxProfileView,
+          messagesLeft: plan.maxMessages,
+          isActive: true,
+        },
+      });
+
+      setTimeout(() => {
+        this.gateway.sendPaymentSuccess(userId.toString(), {
+          subscriptionId: subscribed.id,
+          plan,
+          ...subscribed,
+        });
+      }, 1000);
     }
     return;
   }
