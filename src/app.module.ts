@@ -80,6 +80,5 @@ import { NotificationGateway } from './cores/modules/notification/notification.g
     SettingsModule,
   ],
   providers: [NotificationGateway],
-  // AuthService and AuthController are provided by AuthModule
 })
 export class AppModule {}
