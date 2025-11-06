@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { MailConfigCreateDto } from './dto/mail-config-create.dto';
 import { UpdatePaymentConfigDto } from './dto/update-payment-config.dto';
 import { SettingsService } from './settings.service';
-import { MailConfigCreateDto } from './dto/mail-config-create.dto';
 
 @Controller('settings')
 export class SettingsController {
@@ -13,6 +13,12 @@ export class SettingsController {
   @ApiOperation({ summary: 'Get payment configuration' })
   async getPaymentConfig() {
     return this.settingsService.getPaymentConfig();
+  }
+
+  @Get('/payment-config/user')
+  @ApiOperation({ summary: 'Get payment configuration for user' })
+  async getPaymentConfigForUser() {
+    return this.settingsService.getPaymentConfigForUser();
   }
 
   // update payment configuration
