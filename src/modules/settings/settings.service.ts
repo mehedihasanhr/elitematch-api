@@ -3,16 +3,29 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { UpdatePaymentConfigDto } from './dto/update-payment-config.dto';
-import { ApiTags } from '@nestjs/swagger';
 import { MailConfigCreateDto } from './dto/mail-config-create.dto';
+import { UpdatePaymentConfigDto } from './dto/update-payment-config.dto';
 
 @ApiTags('Settings')
 @Injectable()
 export class SettingsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Configures or retrieves the payment settings for the application.
+   */
+  async getPaymentConfigForUser() {
+    return this.prisma.paymentConfig.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        provider: true,
+      },
+    });
+  }
 
   /**
    * Configures or retrieves the payment settings for the application.
