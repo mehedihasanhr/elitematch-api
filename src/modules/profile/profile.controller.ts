@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -158,6 +159,14 @@ export class ProfileController {
     @Auth('id') userId: number,
   ) {
     await this.service.unlockProfile(id, userId);
+  }
+
+  @Get('/unlocked')
+  @ApiOperation({ summary: 'List unlocked profiles by user' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getUnlockedProfiles(@Auth('id') userId: number) {
+    return this.service.getUnlockedProfiles(userId);
   }
 
   @Delete(':id/avatar/:avatarId')

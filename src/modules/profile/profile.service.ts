@@ -429,7 +429,7 @@ export class ProfileService {
       throw new BadRequestException('No active subscription found');
     }
 
-    if (activeSubscription.profileViewsLeft! <= 0) {
+    if (activeSubscription.profileViewsLeft <= 0) {
       throw new BadRequestException(
         'No profile views left in your subscription',
       );
@@ -465,6 +465,39 @@ export class ProfileService {
 
     return {
       data: profile,
+    };
+  }
+
+  /**
+   *
+   * List unlocked profiles for a user
+   * @param userId - User identifier of the user
+   */
+  async getUnlockedProfiles(userId: number) {
+    const profiles = await this.prisma.unlockedProfile.findMany({
+      where: { userId },
+      include: {
+        profile: {
+          select: {
+            id: true,
+            avatars: {
+              select: { id: true, url: true },
+            },
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: { select: { id: true, url: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      data: profiles.map((p) => p.profile),
     };
   }
 

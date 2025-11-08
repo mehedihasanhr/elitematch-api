@@ -134,4 +134,19 @@ export class SubscriptionService {
     }
     return;
   }
+
+  /**
+   *  Get subscription details for a user
+   * @param userId - The user ID
+   */
+  async getUserSubscription(userId: number) {
+    const subscription = await this.prisma.subscription.findMany({
+      where: { userId, endDate: { gte: new Date() } },
+      include: {
+        plan: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return subscription;
+  }
 }
