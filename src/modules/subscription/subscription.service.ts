@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { PaymentProvider } from '@prisma/client';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { StripeService } from 'src/cores/modules/stripe/stripe.service';
-import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { PaymentProvider } from '@prisma/client';
 import Stripe from 'stripe';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionGateway } from './subscription.gateway';
 
 @Injectable()
@@ -76,6 +76,7 @@ export class SubscriptionService {
    */
   async handleStripeWebhook(payload: string, sig: string) {
     const event = await this.stripeService.webhookEvent(payload, sig);
+    console.log({ event });
     if (!event)
       throw new BadRequestException({ message: 'Invalid Stripe webhook' });
 
