@@ -68,7 +68,9 @@ export class ReportsService {
     const report = await this.prisma.$transaction(async (q) => {
       // fetch subscriptions in range
       const subs = await q.subscription.findMany({
-        where: { createdAt: { gte: from, lte: to } },
+        where: {
+          AND: [{ createdAt: { gte: from } }, { createdAt: { lte: to } }],
+        },
         include: {
           plan: { select: { id: true, name: true, price: true } },
         },
@@ -83,10 +85,7 @@ export class ReportsService {
       // snapshot of active subscribers (isActive true and endDate not passed OR endDate null)
       const activeSubscribers = await q.subscription.count({
         where: {
-          OR: [
-            { isActive: true, endDate: { gte: new Date() } },
-            { isActive: true, endDate: null },
-          ],
+          OR: [{ endDate: { gte: new Date() } }],
         },
       });
 

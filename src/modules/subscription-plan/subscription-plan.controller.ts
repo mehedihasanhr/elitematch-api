@@ -23,6 +23,7 @@ import { SubscriptionPlanService } from './subscription-plan.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateSubscriptionPlanDto } from './dto/create-subscription-plan.dto';
 import { UpdateSubscriptionPlanDto } from './dto/update-subcription-plan.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('subscription-plans')
 @Controller('subscription-plans')
@@ -48,8 +49,8 @@ export class SubscriptionPlanController {
   }
 
   @Post()
-  @ApiBearerAuth('JWT-auth')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a subscription plan (admin only)' })
   @ApiCreatedResponse({ description: 'Subscription plan created successfully' })
   @ApiBadRequestResponse({ description: 'Validation failed' })

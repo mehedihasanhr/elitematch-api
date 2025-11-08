@@ -101,6 +101,7 @@ model User {
   messageSender                       Message[]                     @relation("MessageSender")
   messageReceiver                     Message[]                     @relation("MessageReceiver")
   chats                               Chat[]
+  transactions                        Transaction[]
 
   @@map("users")
 }
@@ -948,8 +949,9 @@ model Subscription {
   updatedAt        DateTime  @updatedAt @map("updated_at")
   amountPaid       Float     @map("amount_paid")
 
-  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  Transaction Transaction[]
 
   @@map("subscriptions")
 }
@@ -1158,4 +1160,22 @@ model MailConfig {
   user     String @db.VarChar(255)
 
   @@map("mail_configs")
+}
+
+model Transaction {
+  id             Int             @id @default(autoincrement())
+  userId         Int             @map("user_id")
+  subscriptionId Int             @map("subscription_id")
+  subscription   Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amount         Float
+  currency       String          @db.VarChar(10)
+  provider       PaymentProvider
+  providerTxId   String          @map("provider_tx_id") @db.VarChar(255)
+  status         String          @db.VarChar(100) // pending, completed, failed, refunded, etc.
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
 }

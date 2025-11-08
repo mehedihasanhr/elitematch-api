@@ -5,6 +5,8 @@ import { StripeService } from 'src/cores/modules/stripe/stripe.service';
 import Stripe from 'stripe';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionGateway } from './subscription.gateway';
+import { SubscriptionQueryDto } from './dto/subscription-query.dto';
+import { paginate } from '../../utils/paginate';
 
 @Injectable()
 export class SubscriptionService {
@@ -72,11 +74,43 @@ export class SubscriptionService {
   }
 
   /**
+   * Find All subscriptions
+   * @params Query - SubscriptionQueryDto
+   */
+
+  async findAll(query: SubscriptionQueryDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const userId = query.userId;
+
+    const where: Record<string, unknown> = {};
+    if (userId) where['userId'] = userId;
+
+    const take = Math.max(10, limit);
+    const currentPage = Math.max(1, page);
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.subscription.findMany({
+        where,
+        skip: (currentPage - 1) * take,
+        take,
+        orderBy: { id: 'desc' },
+        include: {
+          plan: true,
+        },
+      }),
+      this.prisma.subscription.count({ where }),
+    ]);
+
+    return paginate(items, { total, page: currentPage, limit: take });
+  }
+
+  /**
    * Stripe webhook handler
    */
   async handleStripeWebhook(payload: string, sig: string) {
     const event = await this.stripeService.webhookEvent(payload, sig);
-    console.log({ event });
+
     if (!event)
       throw new BadRequestException({ message: 'Invalid Stripe webhook' });
 
@@ -121,6 +155,16 @@ export class SubscriptionService {
           isActive: true,
           paymentStatus: 'paid',
           amountPaid: plan.price,
+          Transaction: {
+            create: {
+              user: { connect: { id: userId } },
+              amount: plan.price,
+              provider: PaymentProvider.STRIPE,
+              providerTxId: session.id,
+              status: 'completed',
+              currency: 'usd',
+            },
+          },
         },
       });
 

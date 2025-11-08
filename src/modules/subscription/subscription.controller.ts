@@ -15,10 +15,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionService } from './subscription.service';
 import { UserSubscriptionQueryDto } from './dto/user-subscription-query.dto';
+import { SubscriptionQueryDto } from './dto/subscription-query.dto';
 
 @Controller('subscription')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
+
+  /** * Get subscriptions details */
+  @ApiOperation({ summary: 'Get user subscription details' })
+  @Get()
+  async getSubscriptions(@Query() query: SubscriptionQueryDto) {
+    return this.subscriptionService.findAll(query);
+  }
 
   /** Get user subscription details */
   @ApiOperation({ summary: 'Get user subscription details' })

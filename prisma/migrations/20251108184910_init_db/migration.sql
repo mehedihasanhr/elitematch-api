@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE `users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `sk_customer_id` VARCHAR(255) NULL,
     `email` VARCHAR(255) NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
@@ -22,7 +23,7 @@ CREATE TABLE `users` (
 -- CreateTable
 CREATE TABLE `files` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `original_name` VARCHAR(191) NOT NULL,
+    `original_name` TEXT NOT NULL,
     `mimeType` VARCHAR(191) NOT NULL,
     `fileSize` INTEGER NOT NULL,
     `width` INTEGER NOT NULL,
@@ -36,7 +37,6 @@ CREATE TABLE `files` (
     `uploadedBy` INTEGER NULL,
 
     UNIQUE INDEX `files_hash_key`(`hash`),
-    INDEX `idx_file_original_name`(`original_name`),
     INDEX `idx_file_hash`(`hash`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -52,6 +52,7 @@ CREATE TABLE `file_usage` (
 
     INDEX `idx_file_usage_file_id`(`fileId`),
     INDEX `idx_file_usage_model_id`(`model_id`),
+    UNIQUE INDEX `file_usage_fileId_model_model_id_key`(`fileId`, `model`, `model_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -645,9 +646,9 @@ CREATE TABLE `subscription_plans` (
     `description` TEXT NULL,
     `price` DOUBLE NOT NULL,
     `duration_days` INTEGER NOT NULL DEFAULT 30,
-    `max_profile_view` INTEGER NULL DEFAULT 1,
-    `max_messages` INTEGER NULL DEFAULT 1,
-    `max_video_call_make` INTEGER NULL DEFAULT 1,
+    `max_profile_view` INTEGER NOT NULL DEFAULT 1,
+    `max_messages` INTEGER NOT NULL DEFAULT 1,
+    `max_video_call_make` INTEGER NOT NULL DEFAULT 1,
     `match_maker_access` BOOLEAN NOT NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -663,12 +664,13 @@ CREATE TABLE `subscriptions` (
     `plan_id` INTEGER NOT NULL,
     `start_date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `end_date` DATETIME(3) NULL,
-    `profile_views_left` INTEGER NULL DEFAULT 0,
-    `messages_left` INTEGER NULL DEFAULT 0,
-    `video_calls_left` INTEGER NULL DEFAULT 0,
+    `profiles_viewed` INTEGER NOT NULL DEFAULT 0,
+    `message_left` INTEGER NOT NULL DEFAULT 0,
+    `payment_status` VARCHAR(100) NOT NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `amount_paid` DOUBLE NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -734,6 +736,153 @@ CREATE TABLE `quick_links` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `testimonials` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `content` TEXT NOT NULL,
+    `author` VARCHAR(255) NOT NULL DEFAULT 'Anonymous',
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `thumbnail_id` INTEGER NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `contact_messages` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(20) NULL,
+    `subject` VARCHAR(255) NOT NULL,
+    `message` TEXT NOT NULL,
+    `is_read` BOOLEAN NOT NULL DEFAULT false,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `stories` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `slug` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `is_published` BOOLEAN NOT NULL DEFAULT false,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+    `cover_image_id` INTEGER NULL,
+
+    UNIQUE INDEX `stories_slug_key`(`slug`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `unlocked_profiles` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `profile_id` INTEGER NOT NULL,
+    `expiry` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `chats` (
+    `id` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `messages` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `chat_id` VARCHAR(191) NOT NULL,
+    `sender_id` INTEGER NOT NULL,
+    `receiver_id` INTEGER NOT NULL,
+    `is_seen` BOOLEAN NOT NULL DEFAULT false,
+    `delivered` BOOLEAN NOT NULL DEFAULT false,
+    `content` TEXT NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `payment_configs` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `provider` ENUM('STRIPE', 'PAYPAL', 'SQUARE', 'OTHER') NOT NULL,
+    `secret_api_key` VARCHAR(300) NOT NULL,
+    `public_api_key` VARCHAR(300) NULL,
+    `webhook_secret` VARCHAR(300) NULL,
+    `version` VARCHAR(50) NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `mode` VARCHAR(50) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `payment_configs_provider_key`(`provider`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `notifications` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `metadata` JSON NULL,
+    `type` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `notification_recipients` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `notificationId` INTEGER NOT NULL,
+    `userId` VARCHAR(255) NOT NULL,
+    `read` BOOLEAN NOT NULL DEFAULT false,
+    `readAt` DATETIME(3) NULL,
+
+    UNIQUE INDEX `notification_recipients_notificationId_userId_key`(`notificationId`, `userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `mail_configs` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `host` VARCHAR(255) NOT NULL,
+    `port` INTEGER NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `user` VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `transactions` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `subscription_id` INTEGER NOT NULL,
+    `amount` DOUBLE NOT NULL,
+    `currency` VARCHAR(10) NOT NULL,
+    `provider` ENUM('STRIPE', 'PAYPAL', 'SQUARE', 'OTHER') NOT NULL,
+    `provider_tx_id` VARCHAR(255) NOT NULL,
+    `status` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_FileToProfile` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
@@ -758,6 +907,15 @@ CREATE TABLE `_BlogToBlogTag` (
 
     UNIQUE INDEX `_BlogToBlogTag_AB_unique`(`A`, `B`),
     INDEX `_BlogToBlogTag_B_index`(`B`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `_ChatToUser` (
+    `A` VARCHAR(191) NOT NULL,
+    `B` INTEGER NOT NULL,
+
+    UNIQUE INDEX `_ChatToUser_AB_unique`(`A`, `B`),
+    INDEX `_ChatToUser_B_index`(`B`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
@@ -1100,6 +1258,36 @@ ALTER TABLE `site_metadata` ADD CONSTRAINT `site_metadata_logo_id_fkey` FOREIGN 
 ALTER TABLE `site_metadata` ADD CONSTRAINT `site_metadata_favicon_id_fkey` FOREIGN KEY (`favicon_id`) REFERENCES `files`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `testimonials` ADD CONSTRAINT `testimonials_thumbnail_id_fkey` FOREIGN KEY (`thumbnail_id`) REFERENCES `files`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `stories` ADD CONSTRAINT `stories_cover_image_id_fkey` FOREIGN KEY (`cover_image_id`) REFERENCES `files`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `unlocked_profiles` ADD CONSTRAINT `unlocked_profiles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `unlocked_profiles` ADD CONSTRAINT `unlocked_profiles_profile_id_fkey` FOREIGN KEY (`profile_id`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_chat_id_fkey` FOREIGN KEY (`chat_id`) REFERENCES `chats`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_sender_id_fkey` FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `messages` ADD CONSTRAINT `messages_receiver_id_fkey` FOREIGN KEY (`receiver_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `notification_recipients` ADD CONSTRAINT `notification_recipients_notificationId_fkey` FOREIGN KEY (`notificationId`) REFERENCES `notifications`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transactions` ADD CONSTRAINT `transactions_subscription_id_fkey` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `transactions` ADD CONSTRAINT `transactions_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `_FileToProfile` ADD CONSTRAINT `_FileToProfile_A_fkey` FOREIGN KEY (`A`) REFERENCES `files`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1116,3 +1304,9 @@ ALTER TABLE `_BlogToBlogTag` ADD CONSTRAINT `_BlogToBlogTag_A_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `_BlogToBlogTag` ADD CONSTRAINT `_BlogToBlogTag_B_fkey` FOREIGN KEY (`B`) REFERENCES `blog_tags`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_ChatToUser` ADD CONSTRAINT `_ChatToUser_A_fkey` FOREIGN KEY (`A`) REFERENCES `chats`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_ChatToUser` ADD CONSTRAINT `_ChatToUser_B_fkey` FOREIGN KEY (`B`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
