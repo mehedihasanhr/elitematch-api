@@ -156,4 +156,10 @@ export class StripeService {
 
     return event;
   }
+
+  // get subscription details
+  async getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+    const stripe = await this.initStripe();
+    return stripe.subscriptions.retrieve(subscriptionId);
+  }
 }

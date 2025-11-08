@@ -19,7 +19,7 @@ import { UpdatePasswordDto } from './dto/password-update.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -35,6 +35,7 @@ export class AuthController {
    */
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('/me')
   async me(@Auth('id') userId: number) {
     return this.service.getUser(userId);
