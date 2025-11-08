@@ -104,6 +104,9 @@ export class SubscriptionService {
 
     if (!userId || !planId || !plan) return;
 
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+
     if (session.payment_status === 'paid' && plan) {
       // create subscription record in the database
       const subscribed = await this.prisma.subscription.create({
@@ -111,10 +114,12 @@ export class SubscriptionService {
           userId,
           planId,
           startDate: new Date(),
-          endDate: new Date(session.expires_at),
+          endDate: expiryDate,
           profileViewsLeft: plan.maxProfileView,
           messagesLeft: plan.maxMessages,
           isActive: true,
+          paymentStatus: 'paid',
+          amountPaid: plan.price,
         },
       });
 

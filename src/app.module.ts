@@ -36,6 +36,7 @@ import { MessageModule } from './modules/message/message.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { NotificationGateway } from './cores/modules/notification/notification.gateway';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { NotificationGateway } from './cores/modules/notification/notification.g
     ChatsModule,
     MessageModule,
     SettingsModule,
+    ReportsModule,
   ],
   providers: [NotificationGateway],
 })
