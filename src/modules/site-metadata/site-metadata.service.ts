@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { FileService } from 'src/cores/modules/file/file.service';
+import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { CreateSiteMetadatumDto } from './dto/create-site-metadatum.dto';
 import { UpdateSiteMetadatumDto } from './dto/update-site-metadatum.dto';
-import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { FileService } from 'src/cores/modules/file/file.service';
 
 @Injectable()
 export class SiteMetadataService {
@@ -66,7 +66,7 @@ export class SiteMetadataService {
     };
   }
 
-  findOne() {
+  async findOne() {
     return this.prisma.siteMetadata.findFirst();
   }
 
@@ -78,36 +78,53 @@ export class SiteMetadataService {
    * @param favicon - Optional new favicon file.
    */
   async update(
-    id: number,
     updateSiteMetadatumDto: UpdateSiteMetadatumDto,
     logo?: Express.Multer.File,
     favicon?: Express.Multer.File,
   ) {
-    const exittingSiteMetadata = await this.prisma.siteMetadata.findUnique({
-      where: { id },
-    });
+    let existingSiteMetadata = await this.prisma.siteMetadata.findFirst();
 
-    if (!exittingSiteMetadata)
-      throw new BadRequestException('Site Metadata not found');
+    if (!existingSiteMetadata) {
+      existingSiteMetadata = await this.prisma.siteMetadata.create({
+        data: {
+          companyName: 'Company Name',
+          tagline: '',
+          description: '',
+          email: '',
+          phone: '',
+          address: '',
+          meta: {},
+        },
+      });
+    }
 
-    let logoId = exittingSiteMetadata.logoId;
-    let faviconId = exittingSiteMetadata.faviconId;
+    console.log({ existingSiteMetadata });
+
+    let logoId = existingSiteMetadata.logoId;
+    let faviconId = existingSiteMetadata.faviconId;
 
     if (logo) {
       const logoFile = await this.fileService.processAndSaveFile(logo);
       logoId = logoFile.id;
 
       // update file usage
-      await this.prisma.fileUsage.updateMany({
+      await this.prisma.fileUsage.upsert({
         where: {
-          fileId: exittingSiteMetadata.logoId || undefined,
-          model: 'SiteMetadata',
-          modelId: id,
+          fileId_model_modelId: {
+            fileId: existingSiteMetadata.logoId as number,
+            model: 'SiteMetadata',
+            modelId: existingSiteMetadata.id,
+          },
         },
-        data: { fileId: logoFile.id },
+        update: { fileId: logoFile.id },
+        create: {
+          fileId: logoFile.id,
+          model: 'SiteMetadata',
+          modelId: existingSiteMetadata.id,
+        },
       });
 
-      await this.fileService.removeExistingFile(exittingSiteMetadata.logoId!);
+      await this.fileService.removeExistingFile(existingSiteMetadata.logoId!);
     }
 
     if (favicon) {
@@ -115,22 +132,29 @@ export class SiteMetadataService {
       faviconId = file.id;
 
       // update file usage
-      await this.prisma.fileUsage.updateMany({
+      await this.prisma.fileUsage.upsert({
         where: {
-          fileId: exittingSiteMetadata.faviconId || undefined,
-          model: 'SiteMetadata',
-          modelId: id,
+          fileId_model_modelId: {
+            fileId: existingSiteMetadata.faviconId as number,
+            model: 'SiteMetadata',
+            modelId: existingSiteMetadata.id,
+          },
         },
-        data: { fileId: file.id },
+        update: { fileId: file.id },
+        create: {
+          fileId: file.id,
+          model: 'SiteMetadata',
+          modelId: existingSiteMetadata.id,
+        },
       });
 
       await this.fileService.removeExistingFile(
-        exittingSiteMetadata.faviconId!,
+        existingSiteMetadata.faviconId!,
       );
     }
 
     const update = await this.prisma.siteMetadata.update({
-      where: { id },
+      where: { id: existingSiteMetadata.id },
       data: {
         ...updateSiteMetadatumDto,
         logo: { connect: { id: logoId || undefined } },

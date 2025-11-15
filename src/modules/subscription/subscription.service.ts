@@ -3,10 +3,10 @@ import { PaymentProvider } from '@prisma/client';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { StripeService } from 'src/cores/modules/stripe/stripe.service';
 import Stripe from 'stripe';
-import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { SubscriptionGateway } from './subscription.gateway';
-import { SubscriptionQueryDto } from './dto/subscription-query.dto';
 import { paginate } from '../../utils/paginate';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { SubscriptionQueryDto } from './dto/subscription-query.dto';
+import { SubscriptionGateway } from './subscription.gateway';
 
 @Injectable()
 export class SubscriptionService {
@@ -97,6 +97,7 @@ export class SubscriptionService {
         orderBy: { id: 'desc' },
         include: {
           plan: true,
+          user: true,
         },
       }),
       this.prisma.subscription.count({ where }),

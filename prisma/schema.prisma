@@ -980,17 +980,37 @@ model NewsletterSubscriber {
 }
 
 model SiteMetadata {
-  id           Int     @id @default(autoincrement())
-  title        String  @db.VarChar(255)
-  organization String  @db.VarChar(255)
-  description  String? @db.Text
-  logoId       Int?    @map("logo_id")
-  faviconId    Int?    @map("favicon_id")
+  id          Int     @id @default(autoincrement())
+  companyName String  @map("company_name") @db.VarChar(255)
+  tagline     String  @db.VarChar(255)
+  description String? @db.LongText
+  address     String? @db.Text
+  phone       String? @db.VarChar(15)
+  email       String? @db.VarChar(255)
+  meta        Json?   @map("meta")
+  logoId      Int?    @map("logo_id")
+  faviconId   Int?    @map("favicon_id")
 
   logo    File? @relation("LogoFile", fields: [logoId], references: [id])
   favicon File? @relation("FaviconFile", fields: [faviconId], references: [id])
 
   @@map("site_metadata")
+}
+
+model SiteSeo {
+  id            Int      @id @default(autoincrement())
+  title         String   @db.VarChar(255)
+  description   String?  @db.VarChar(500)
+  keywords      String?  @db.Text
+  ogTitle       String?  @map("og_title") @db.VarChar(255)
+  ogType        String?  @map("og_type") @db.VarChar(100)
+  ogDescription String?  @map("og_description") @db.VarChar(500)
+  canonicalUrl  String?  @map("canonical_url") @db.VarChar(255)
+  meta          Json?    @db.Json
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("site_seo")
 }
 
 enum GoogleScriptType {

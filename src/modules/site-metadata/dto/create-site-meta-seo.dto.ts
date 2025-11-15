@@ -1,21 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateSiteMetadatumDto {
+export class CreateSiteMetaSeoDto {
   @ApiProperty({ description: 'Title of the site' })
   @IsString()
   @IsNotEmpty()
-  companyName: string;
-
-  @ApiProperty({ description: 'Title of the site' })
-  @IsString()
-  @IsOptional()
-  tagline: string;
-
-  @ApiProperty({ description: 'Organization name for the site' })
-  @IsString()
-  @IsOptional()
-  address?: string;
+  title: string;
 
   @ApiProperty({ required: false, description: 'Meta description of the site' })
   @IsString()
@@ -25,12 +15,27 @@ export class CreateSiteMetadatumDto {
   @ApiProperty({ required: false, description: 'Meta description of the site' })
   @IsString()
   @IsOptional()
-  phone?: string;
+  keywords?: string;
 
   @ApiProperty({ required: false, description: 'Meta description of the site' })
   @IsString()
   @IsOptional()
-  email?: string;
+  ogTitle?: string;
+
+  @ApiProperty({ required: false, description: 'Meta description of the site' })
+  @IsString()
+  @IsOptional()
+  ogType?: string;
+
+  @ApiProperty({ required: false, description: 'Meta description of the site' })
+  @IsString()
+  @IsOptional()
+  ogDescription?: string;
+
+  @ApiProperty({ required: false, description: 'Meta description of the site' })
+  @IsString()
+  @IsOptional()
+  canonicalUrl?: string;
 
   @ApiProperty({ required: false, description: 'Meta description of the site' })
   @IsString()

@@ -446,8 +446,22 @@ export class MatchCalculatorService {
     return {
       score,
       breakdown,
-      profileA: { userId: profileA.userId, id: profileA.id },
-      profileB: { userId: profileB.userId, id: profileB.id },
+      profileA: {
+        userId: profileA.userId,
+        id: profileA.id,
+        avatars: profileA.avatars,
+        firstName: profileA.user?.firstName,
+        lastName: profileA.user?.lastName,
+        email: profileA.user?.email,
+      },
+      profileB: {
+        userId: profileB.userId,
+        id: profileB.id,
+        avatars: profileB.avatars,
+        firstName: profileB.user?.firstName,
+        lastName: profileB.user?.lastName,
+        email: profileB.user?.email,
+      },
     };
   }
 }

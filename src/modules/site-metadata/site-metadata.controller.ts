@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
   Post,
   UploadedFiles,
@@ -10,12 +9,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { multerOptions } from 'src/cores/config/multer.conf';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateSiteMetadatumDto } from './dto/create-site-metadatum.dto';
 import { UpdateSiteMetadatumDto } from './dto/update-site-metadatum.dto';
 import { SiteMetadataService } from './site-metadata.service';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('site-metadata')
 @Controller('site-metadata')
@@ -67,7 +66,7 @@ export class SiteMetadataController {
     return this.siteMetadataService.findOne();
   }
 
-  @Patch(':id')
+  @Patch('/update')
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateSiteMetadatumDto })
@@ -91,7 +90,6 @@ export class SiteMetadataController {
     ),
   )
   update(
-    @Param('id') id: string,
     @Body() updateSiteMetadatumDto: UpdateSiteMetadatumDto,
     @UploadedFiles()
     files: {
@@ -100,7 +98,6 @@ export class SiteMetadataController {
     },
   ) {
     return this.siteMetadataService.update(
-      +id,
       updateSiteMetadatumDto,
       files.logo?.[0],
       files.favicon?.[0],
