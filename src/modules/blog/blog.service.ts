@@ -134,6 +134,7 @@ export class BlogService {
           category: true,
           coverImage: true,
           blogTags: true,
+          seo: true,
         },
       }),
       this.prisma.blog.count({ where }),
