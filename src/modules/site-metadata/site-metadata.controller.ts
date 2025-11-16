@@ -4,16 +4,23 @@ import {
   Get,
   Patch,
   Post,
+  Put,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { multerOptions } from 'src/cores/config/multer.conf';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateSiteMetadatumDto } from './dto/create-site-metadatum.dto';
-import { UpdateSiteMetadatumDto } from './dto/update-site-metadatum.dto';
+import { CreateSiteMetadataDto } from './dto/create-site-metadata.dto';
+import { UpdateSiteMetadataDto } from './dto/update-site-metadata.dto';
 import { SiteMetadataService } from './site-metadata.service';
 
 @ApiTags('site-metadata')
@@ -27,7 +34,7 @@ export class SiteMetadataController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: CreateSiteMetadatumDto })
+  @ApiBody({ type: CreateSiteMetadataDto })
   @ApiBody({
     schema: {
       type: 'object',
@@ -47,7 +54,7 @@ export class SiteMetadataController {
     ),
   )
   create(
-    @Body() createSiteMetadatumDto: CreateSiteMetadatumDto,
+    @Body() CreateSiteMetadataDto: CreateSiteMetadataDto,
     @UploadedFiles()
     files: {
       logo?: Express.Multer.File[];
@@ -55,7 +62,7 @@ export class SiteMetadataController {
     },
   ) {
     return this.siteMetadataService.create(
-      createSiteMetadatumDto,
+      CreateSiteMetadataDto,
       files.logo?.[0],
       files.favicon?.[0],
     );
@@ -66,10 +73,40 @@ export class SiteMetadataController {
     return this.siteMetadataService.findOne();
   }
 
+  @Put('/upsert')
+  @ApiOperation({ summary: 'Create or update site metadata' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateSiteMetadataDto })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'logo', maxCount: 1 },
+        { name: 'favicon', maxCount: 1 },
+      ],
+      multerOptions,
+    ),
+  )
+  upsert(
+    @Body() CreateSiteMetadataDto: CreateSiteMetadataDto,
+    @UploadedFiles()
+    files: {
+      logo?: Express.Multer.File[];
+      favicon?: Express.Multer.File[];
+    },
+  ) {
+    return this.siteMetadataService.upsert(
+      CreateSiteMetadataDto,
+      files.logo?.[0],
+      files.favicon?.[0],
+    );
+  }
+
   @Patch('/update')
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: UpdateSiteMetadatumDto })
+  @ApiBody({ type: UpdateSiteMetadataDto })
   @ApiBody({
     schema: {
       type: 'object',
@@ -90,7 +127,7 @@ export class SiteMetadataController {
     ),
   )
   update(
-    @Body() updateSiteMetadatumDto: UpdateSiteMetadatumDto,
+    @Body() updateSiteMetadataDto: UpdateSiteMetadataDto,
     @UploadedFiles()
     files: {
       logo?: Express.Multer.File[];
@@ -98,7 +135,7 @@ export class SiteMetadataController {
     },
   ) {
     return this.siteMetadataService.update(
-      updateSiteMetadatumDto,
+      updateSiteMetadataDto,
       files.logo?.[0],
       files.favicon?.[0],
     );

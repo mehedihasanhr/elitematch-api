@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileService } from 'src/cores/modules/file/file.service';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { CreateSiteMetadatumDto } from './dto/create-site-metadatum.dto';
-import { UpdateSiteMetadatumDto } from './dto/update-site-metadatum.dto';
+import { CreateSiteMetadataDto } from './dto/create-site-metadata.dto';
+import { UpdateSiteMetadataDto } from './dto/update-site-metadata.dto';
 
 @Injectable()
 export class SiteMetadataService {
@@ -13,12 +13,12 @@ export class SiteMetadataService {
 
   /**
    * Create a new site metadata entry.
-   * @param createSiteMetadatumDto - Data Transfer Object containing site metadata details.
+   * @param CreateSiteMetadataDto - Data Transfer Object containing site metadata details.
    * @param logo - Optional logo file.
    * @param favicon - Optional favicon file.
    */
   async create(
-    createSiteMetadatumDto: CreateSiteMetadatumDto,
+    CreateSiteMetadataDto: CreateSiteMetadataDto,
     logo?: Express.Multer.File,
     favicon?: Express.Multer.File,
   ) {
@@ -31,7 +31,7 @@ export class SiteMetadataService {
 
     const siteMetadata = await this.prisma.siteMetadata.create({
       data: {
-        ...createSiteMetadatumDto,
+        ...CreateSiteMetadataDto,
         logo: { connect: { id: logoFile.id } },
         favicon: { connect: { id: faviconFile.id } },
       },
@@ -73,12 +73,12 @@ export class SiteMetadataService {
   /***
    * Update site metadata entry.
    * @param id - ID of the site metadata to update.
-   * @param updateSiteMetadatumDto - Data Transfer Object containing updated site metadata details.
+   * @param updateSiteMetadataDto - Data Transfer Object containing updated site metadata details.
    * @param logo - Optional new logo file.
    * @param favicon - Optional new favicon file.
    */
   async update(
-    updateSiteMetadatumDto: UpdateSiteMetadatumDto,
+    updateSiteMetadataDto: UpdateSiteMetadataDto,
     logo?: Express.Multer.File,
     favicon?: Express.Multer.File,
   ) {
@@ -97,8 +97,6 @@ export class SiteMetadataService {
         },
       });
     }
-
-    console.log({ existingSiteMetadata });
 
     let logoId = existingSiteMetadata.logoId;
     let faviconId = existingSiteMetadata.faviconId;
@@ -156,12 +154,30 @@ export class SiteMetadataService {
     const update = await this.prisma.siteMetadata.update({
       where: { id: existingSiteMetadata.id },
       data: {
-        ...updateSiteMetadatumDto,
+        ...updateSiteMetadataDto,
         logo: { connect: { id: logoId || undefined } },
         favicon: { connect: { id: faviconId || undefined } },
       },
     });
 
     return update;
+  }
+
+  /**
+   *
+   * Upsert site metadata entry.
+   * @param CreateSiteMetadataDto - Data Transfer Object containing site metadata details.
+   */
+  async upsert(
+    dto: CreateSiteMetadataDto,
+    logo?: Express.Multer.File,
+    favicon?: Express.Multer.File,
+  ) {
+    const existingSiteMetadata = await this.prisma.siteMetadata.findFirst();
+    if (existingSiteMetadata) {
+      return await this.update({ ...dto }, logo, favicon);
+    } else {
+      return await this.create(dto, logo, favicon);
+    }
   }
 }

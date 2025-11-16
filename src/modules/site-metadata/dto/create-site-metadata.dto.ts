@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateSiteMetadatumDto {
+export class CreateSiteMetadataDto {
   @ApiProperty({ description: 'Title of the site' })
   @IsString()
   @IsNotEmpty()

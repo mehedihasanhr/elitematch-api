@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { CreateSiteMetaSeoDto } from './dto/create-site-meta-seo.dto';
-import { UpdateSiteMetaSeoDto } from './dto/update-site-meta-seo.dto';
 
 @Injectable()
 export class SiteMetaSeoService {
@@ -13,7 +12,22 @@ export class SiteMetaSeoService {
    * @param logo - Optional logo file.
    * @param favicon - Optional favicon file.
    */
-  async create(createSiteMetaSeoDto: CreateSiteMetaSeoDto) {
+  async upsert(createSiteMetaSeoDto: CreateSiteMetaSeoDto) {
+    const existingSiteMetaSeo = await this.prisma.siteSeo.findFirst();
+
+    if (existingSiteMetaSeo) {
+      const updatedSiteMetaSeo = await this.prisma.siteSeo.update({
+        where: { id: existingSiteMetaSeo.id },
+        data: createSiteMetaSeoDto,
+      });
+      return {
+        data: updatedSiteMetaSeo,
+        message: 'Site Seo updated successfully',
+        status: 'success',
+        statusCode: 200,
+      };
+    }
+
     const siteMetaSeo = await this.prisma.siteSeo.create({
       data: createSiteMetaSeoDto,
     });
@@ -28,30 +42,5 @@ export class SiteMetaSeoService {
 
   async findOne() {
     return this.prisma.siteSeo.findFirst();
-  }
-
-  /***
-   * Update site metadata entry.
-   * @param id - ID of the site metadata to update.
-   * @param updateSiteMetadatumDto - Data Transfer Object containing updated site metadata details.
-   * @param logo - Optional new logo file.
-   * @param favicon - Optional new favicon file.
-   */
-  async update(id: number, updateSiteMetaSeoDto: UpdateSiteMetaSeoDto) {
-    const exittingSiteMetaSeo = await this.prisma.siteSeo.findUnique({
-      where: { id },
-    });
-
-    if (!exittingSiteMetaSeo)
-      throw new BadRequestException('Site Metadata not found');
-
-    const update = await this.prisma.siteSeo.update({
-      where: { id },
-      data: {
-        ...updateSiteMetaSeoDto,
-      },
-    });
-
-    return update;
   }
 }
