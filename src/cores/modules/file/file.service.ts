@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import { extname, join } from 'path';
-import sharp from 'sharp';
+import * as sharp from 'sharp';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 
 @Injectable()

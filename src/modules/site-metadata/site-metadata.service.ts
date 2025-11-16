@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { FileService } from 'src/cores/modules/file/file.service';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { CreateSiteMetadataDto } from './dto/create-site-metadata.dto';
@@ -18,23 +19,26 @@ export class SiteMetadataService {
    * @param favicon - Optional favicon file.
    */
   async create(
-    CreateSiteMetadataDto: CreateSiteMetadataDto,
+    dto: CreateSiteMetadataDto,
     logo?: Express.Multer.File,
     favicon?: Express.Multer.File,
   ) {
-    if (!logo || !favicon) {
-      throw new BadRequestException('Logo and Favicon are required');
-    }
+    // Process files only if provided
+    const logoFile = logo
+      ? await this.fileService.processAndSaveFile(logo)
+      : null;
+    const faviconFile = favicon
+      ? await this.fileService.processAndSaveFile(favicon)
+      : null;
 
-    const logoFile = await this.fileService.processAndSaveFile(logo);
-    const faviconFile = await this.fileService.processAndSaveFile(favicon);
+    const payload = {
+      ...(dto as any),
+      ...(logoFile ? { logo: { connect: { id: logoFile.id } } } : {}),
+      ...(faviconFile ? { favicon: { connect: { id: faviconFile.id } } } : {}),
+    } as Prisma.SiteMetadataCreateInput;
 
     const siteMetadata = await this.prisma.siteMetadata.create({
-      data: {
-        ...CreateSiteMetadataDto,
-        logo: { connect: { id: logoFile.id } },
-        favicon: { connect: { id: faviconFile.id } },
-      },
+      data: payload,
     });
 
     // record file usage
@@ -67,7 +71,9 @@ export class SiteMetadataService {
   }
 
   async findOne() {
-    return this.prisma.siteMetadata.findFirst();
+    return this.prisma.siteMetadata.findFirst({
+      include: { favicon: true, logo: true },
+    });
   }
 
   /***
@@ -109,7 +115,7 @@ export class SiteMetadataService {
       await this.prisma.fileUsage.upsert({
         where: {
           fileId_model_modelId: {
-            fileId: existingSiteMetadata.logoId as number,
+            fileId: existingSiteMetadata.logoId ?? -1,
             model: 'SiteMetadata',
             modelId: existingSiteMetadata.id,
           },
@@ -122,7 +128,9 @@ export class SiteMetadataService {
         },
       });
 
-      await this.fileService.removeExistingFile(existingSiteMetadata.logoId!);
+      if (existingSiteMetadata.logoId) {
+        await this.fileService.removeExistingFile(existingSiteMetadata.logoId);
+      }
     }
 
     if (favicon) {
@@ -133,7 +141,7 @@ export class SiteMetadataService {
       await this.prisma.fileUsage.upsert({
         where: {
           fileId_model_modelId: {
-            fileId: existingSiteMetadata.faviconId as number,
+            fileId: existingSiteMetadata.faviconId ?? -1,
             model: 'SiteMetadata',
             modelId: existingSiteMetadata.id,
           },
@@ -146,18 +154,22 @@ export class SiteMetadataService {
         },
       });
 
-      await this.fileService.removeExistingFile(
-        existingSiteMetadata.faviconId!,
-      );
+      if (existingSiteMetadata.faviconId) {
+        await this.fileService.removeExistingFile(
+          existingSiteMetadata.faviconId,
+        );
+      }
     }
+
+    const updateData = {
+      ...(updateSiteMetadataDto as any),
+      ...(logoId ? { logo: { connect: { id: logoId } } } : {}),
+      ...(faviconId ? { favicon: { connect: { id: faviconId } } } : {}),
+    } as Prisma.SiteMetadataUpdateInput;
 
     const update = await this.prisma.siteMetadata.update({
       where: { id: existingSiteMetadata.id },
-      data: {
-        ...updateSiteMetadataDto,
-        logo: { connect: { id: logoId || undefined } },
-        favicon: { connect: { id: faviconId || undefined } },
-      },
+      data: updateData,
     });
 
     return update;
