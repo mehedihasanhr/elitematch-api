@@ -1,43 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGoogleScriptDto } from './dto/create-google-script.dto';
-import { UpdateGoogleScriptDto } from './dto/update-google-script.dto';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { GoogleScriptType } from '@prisma/client';
 
 @Injectable()
 export class GoogleScriptService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createGoogleScriptDto: CreateGoogleScriptDto) {
-    const googleScript = await this.prisma.googleScript.create({
-      data: { ...createGoogleScriptDto },
-    });
-
-    return {
-      data: googleScript,
-      message: 'Google Script created successfully',
-      status: 'success',
-      statusCode: 201,
-    };
-  }
-
   findAll() {
     return this.prisma.googleScript.findMany();
   }
 
-  async update(id: number, updateGoogleScriptDto: UpdateGoogleScriptDto) {
-    return this.prisma.googleScript.update({
-      where: { id },
-      data: { ...updateGoogleScriptDto },
+  async update(gtype: string, dto: CreateGoogleScriptDto) {
+    return this.prisma.googleScript.upsert({
+      where: { gtype: gtype as GoogleScriptType },
+      update: dto,
+      create: dto,
     });
-  }
-
-  async remove(id: number) {
-    await this.prisma.googleScript.delete({ where: { id } });
-    return {
-      data: null,
-      message: 'Google Script deleted successfully',
-      status: 'success',
-      statusCode: 200,
-    };
   }
 }

@@ -1017,7 +1017,6 @@ enum GoogleScriptType {
   ANALYTICS
   TAG_MANAGER
   ADSENSE
-  OTHER
 }
 
 model GoogleScript {
@@ -1028,6 +1027,7 @@ model GoogleScript {
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
 
+  @@unique([gtype])
   @@map("google_scripts")
 }
 
