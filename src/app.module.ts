@@ -38,6 +38,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { NotificationGateway } from './cores/modules/notification/notification.gateway';
 import { ReportsModule } from './modules/reports/reports.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
+import { ApiKeyModule } from './cores/modules/api-key/api-key.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { TransactionModule } from './modules/transaction/transaction.module';
       isGlobal: true,
       envFilePath: `.env`,
     }),
+    ApiKeyModule,
     PrismaModule,
     MailModule,
     AuthModule,

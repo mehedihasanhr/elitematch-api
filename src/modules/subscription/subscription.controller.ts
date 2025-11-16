@@ -16,6 +16,7 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionService } from './subscription.service';
 import { UserSubscriptionQueryDto } from './dto/user-subscription-query.dto';
 import { SubscriptionQueryDto } from './dto/subscription-query.dto';
+import { AdminGuard } from 'src/cores/guards/admin.guard';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -23,7 +24,10 @@ export class SubscriptionController {
 
   /** * Get subscriptions details */
   @ApiOperation({ summary: 'Get user subscription details' })
-  @Get()
+  @Get('/all')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
   async getSubscriptions(@Query() query: SubscriptionQueryDto) {
     return this.subscriptionService.findAll(query);
   }
@@ -31,6 +35,8 @@ export class SubscriptionController {
   /** Get user subscription details */
   @ApiOperation({ summary: 'Get user subscription details' })
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiQuery({ name: 'userId', required: true, type: String })
   async getUserSubscription(@Query() query: UserSubscriptionQueryDto) {
     return this.subscriptionService.getUserSubscription(Number(query.userId));
@@ -45,7 +51,6 @@ export class SubscriptionController {
     @Body() data: CreateSubscriptionDto,
     @Auth('id') authId: number,
   ) {
-    console.log({ authId });
     return this.subscriptionService.create(data, authId);
   }
 

@@ -144,6 +144,12 @@ export class SubscriptionService {
     expiryDate.setMonth(expiryDate.getMonth() + 1);
 
     if (session.payment_status === 'paid' && plan) {
+      // previous active subscriptions set to inactive
+      await this.prisma.subscription.updateMany({
+        where: { userId, isActive: true },
+        data: { isActive: false, endDate: new Date() },
+      });
+
       // create subscription record in the database
       const subscribed = await this.prisma.subscription.create({
         data: {
@@ -185,11 +191,9 @@ export class SubscriptionService {
    * @param userId - The user ID
    */
   async getUserSubscription(userId: number) {
-    const subscription = await this.prisma.subscription.findMany({
-      where: { userId, endDate: { gte: new Date() } },
-      include: {
-        plan: true,
-      },
+    const subscription = await this.prisma.subscription.findFirst({
+      where: { userId, isActive: true, endDate: { gte: new Date() } },
+      include: { plan: true },
       orderBy: { createdAt: 'desc' },
     });
     return subscription;

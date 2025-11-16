@@ -25,8 +25,10 @@ export class MessageService {
       where: {
         userId: authId,
         endDate: { gt: new Date() },
+        isActive: true,
       },
       include: { plan: true },
+      orderBy: { endDate: 'asc' },
     });
 
     // throw error if no active subscription
