@@ -88,20 +88,10 @@ export class SiteMetadataService {
     logo?: Express.Multer.File,
     favicon?: Express.Multer.File,
   ) {
-    let existingSiteMetadata = await this.prisma.siteMetadata.findFirst();
+    const existingSiteMetadata = await this.prisma.siteMetadata.findFirst();
 
     if (!existingSiteMetadata) {
-      existingSiteMetadata = await this.prisma.siteMetadata.create({
-        data: {
-          companyName: 'Company Name',
-          tagline: '',
-          description: '',
-          email: '',
-          phone: '',
-          address: '',
-          meta: {},
-        },
-      });
+      throw new Error('Site Metadata not found');
     }
 
     let logoId = existingSiteMetadata.logoId;
@@ -111,25 +101,31 @@ export class SiteMetadataService {
       const logoFile = await this.fileService.processAndSaveFile(logo);
       logoId = logoFile.id;
 
-      // update file usage
-      await this.prisma.fileUsage.upsert({
-        where: {
-          fileId_model_modelId: {
-            fileId: existingSiteMetadata.logoId ?? -1,
+      console.log({ logo: existingSiteMetadata.logoId });
+
+      if (
+        existingSiteMetadata.logoId &&
+        existingSiteMetadata.logoId !== logoId
+      ) {
+        await this.prisma.fileUsage.updateMany({
+          where: {
+            fileId: existingSiteMetadata.logoId,
             model: 'SiteMetadata',
             modelId: existingSiteMetadata.id,
           },
-        },
-        update: { fileId: logoFile.id },
-        create: {
-          fileId: logoFile.id,
-          model: 'SiteMetadata',
-          modelId: existingSiteMetadata.id,
-        },
-      });
+          data: { fileId: logoId },
+        });
 
-      if (existingSiteMetadata.logoId) {
         await this.fileService.removeExistingFile(existingSiteMetadata.logoId);
+      } else {
+        // create file usage
+        await this.prisma.fileUsage.create({
+          data: {
+            fileId: logoFile.id,
+            model: 'SiteMetadata',
+            modelId: existingSiteMetadata.id,
+          },
+        });
       }
     }
 
@@ -137,27 +133,32 @@ export class SiteMetadataService {
       const file = await this.fileService.processAndSaveFile(favicon);
       faviconId = file.id;
 
-      // update file usage
-      await this.prisma.fileUsage.upsert({
-        where: {
-          fileId_model_modelId: {
-            fileId: existingSiteMetadata.faviconId ?? -1,
+      if (
+        existingSiteMetadata.faviconId &&
+        existingSiteMetadata.faviconId !== faviconId
+      ) {
+        // update file usage
+        await this.prisma.fileUsage.updateMany({
+          where: {
+            fileId: existingSiteMetadata.faviconId,
             model: 'SiteMetadata',
             modelId: existingSiteMetadata.id,
           },
-        },
-        update: { fileId: file.id },
-        create: {
-          fileId: file.id,
-          model: 'SiteMetadata',
-          modelId: existingSiteMetadata.id,
-        },
-      });
+          data: { fileId: faviconId },
+        });
 
-      if (existingSiteMetadata.faviconId) {
         await this.fileService.removeExistingFile(
           existingSiteMetadata.faviconId,
         );
+      } else {
+        // create file usage
+        await this.prisma.fileUsage.create({
+          data: {
+            fileId: file.id,
+            model: 'SiteMetadata',
+            modelId: existingSiteMetadata.id,
+          },
+        });
       }
     }
 
