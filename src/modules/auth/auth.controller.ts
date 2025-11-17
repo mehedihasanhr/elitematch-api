@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Auth } from './auth.decorator';
 import { AuthService } from './auth.service';
@@ -19,7 +20,6 @@ import { UpdatePasswordDto } from './dto/password-update.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -125,6 +125,7 @@ export class AuthController {
     const cookieName =
       this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
     const oldRefreshToken = req?.cookies ? req.cookies[cookieName] : undefined;
+    console.log({ oldRefreshToken });
 
     if (!oldRefreshToken) {
       throw new BadRequestException('Invalid Session, please log in again');
@@ -132,11 +133,20 @@ export class AuthController {
 
     const r = await this.service.refreshAccessToken(oldRefreshToken);
 
-    const { refreshToken, ...restResponse } = r;
+    console.log({ r });
 
-    if (refreshToken) this.setRefreshCookie(res, refreshToken);
+    if (r.refreshToken) this.setRefreshCookie(res, r.refreshToken);
 
-    return restResponse;
+    return {
+      data: {
+        ...r.data,
+        accessToken: r.accessToken,
+        refreshToken: r.refreshToken,
+      },
+      message: r.message,
+      status: r.status,
+      statusCode: r.statusCode,
+    };
   }
 
   /*=================================*/
