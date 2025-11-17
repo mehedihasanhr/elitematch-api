@@ -101,22 +101,21 @@ export class SiteMetadataService {
       const logoFile = await this.fileService.processAndSaveFile(logo);
       logoId = logoFile.id;
 
-      console.log({ logo: existingSiteMetadata.logoId });
+      if (existingSiteMetadata.logoId) {
+        if (existingSiteMetadata.logoId !== logoId) {
+          await this.prisma.fileUsage.updateMany({
+            where: {
+              fileId: existingSiteMetadata.logoId,
+              model: 'SiteMetadata',
+              modelId: existingSiteMetadata.id,
+            },
+            data: { fileId: logoId },
+          });
 
-      if (
-        existingSiteMetadata.logoId &&
-        existingSiteMetadata.logoId !== logoId
-      ) {
-        await this.prisma.fileUsage.updateMany({
-          where: {
-            fileId: existingSiteMetadata.logoId,
-            model: 'SiteMetadata',
-            modelId: existingSiteMetadata.id,
-          },
-          data: { fileId: logoId },
-        });
-
-        await this.fileService.removeExistingFile(existingSiteMetadata.logoId);
+          await this.fileService.removeExistingFile(
+            existingSiteMetadata.logoId,
+          );
+        }
       } else {
         // create file usage
         await this.prisma.fileUsage.create({
@@ -133,23 +132,22 @@ export class SiteMetadataService {
       const file = await this.fileService.processAndSaveFile(favicon);
       faviconId = file.id;
 
-      if (
-        existingSiteMetadata.faviconId &&
-        existingSiteMetadata.faviconId !== faviconId
-      ) {
-        // update file usage
-        await this.prisma.fileUsage.updateMany({
-          where: {
-            fileId: existingSiteMetadata.faviconId,
-            model: 'SiteMetadata',
-            modelId: existingSiteMetadata.id,
-          },
-          data: { fileId: faviconId },
-        });
+      if (existingSiteMetadata.faviconId) {
+        if (existingSiteMetadata.faviconId !== faviconId) {
+          // update file usage
+          await this.prisma.fileUsage.updateMany({
+            where: {
+              fileId: existingSiteMetadata.faviconId,
+              model: 'SiteMetadata',
+              modelId: existingSiteMetadata.id,
+            },
+            data: { fileId: faviconId },
+          });
 
-        await this.fileService.removeExistingFile(
-          existingSiteMetadata.faviconId,
-        );
+          await this.fileService.removeExistingFile(
+            existingSiteMetadata.faviconId,
+          );
+        }
       } else {
         // create file usage
         await this.prisma.fileUsage.create({

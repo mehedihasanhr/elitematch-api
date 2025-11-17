@@ -76,9 +76,19 @@ export class SiteMetadataController {
   @Put('/upsert')
   @ApiOperation({ summary: 'Create or update site metadata' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: CreateSiteMetadataDto })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiBody({
+    type: CreateSiteMetadataDto,
+    schema: {
+      type: 'object',
+      properties: {
+        logo: { type: 'string', format: 'binary' },
+        favicon: { type: 'string', format: 'binary' },
+      },
+      required: [],
+    },
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -89,7 +99,7 @@ export class SiteMetadataController {
     ),
   )
   upsert(
-    @Body() CreateSiteMetadataDto: CreateSiteMetadataDto,
+    @Body() createSiteMetadataDto: CreateSiteMetadataDto,
     @UploadedFiles()
     files: {
       logo?: Express.Multer.File[];
@@ -97,7 +107,7 @@ export class SiteMetadataController {
     },
   ) {
     return this.siteMetadataService.upsert(
-      CreateSiteMetadataDto,
+      createSiteMetadataDto,
       files.logo?.[0],
       files.favicon?.[0],
     );

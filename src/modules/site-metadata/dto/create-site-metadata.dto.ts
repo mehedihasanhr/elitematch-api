@@ -36,4 +36,22 @@ export class CreateSiteMetadataDto {
   @IsString()
   @IsOptional()
   meta?: string;
+
+  @ApiProperty({
+    required: false,
+    type: 'string',
+    format: 'binary',
+    description: 'Logo file',
+  })
+  @IsOptional()
+  logo?: any;
+
+  @ApiProperty({
+    required: false,
+    type: 'string',
+    format: 'binary',
+    description: 'Favicon file',
+  })
+  @IsOptional()
+  favicon?: any;
 }
