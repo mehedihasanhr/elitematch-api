@@ -703,11 +703,32 @@ CREATE TABLE `newsletter_subscribers` (
 -- CreateTable
 CREATE TABLE `site_metadata` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(255) NOT NULL,
-    `organization` VARCHAR(255) NOT NULL,
-    `description` TEXT NULL,
+    `company_name` VARCHAR(255) NOT NULL,
+    `tagline` VARCHAR(255) NOT NULL,
+    `description` LONGTEXT NULL,
+    `address` TEXT NULL,
+    `phone` VARCHAR(20) NULL,
+    `email` VARCHAR(255) NULL,
+    `meta` JSON NULL,
     `logo_id` INTEGER NULL,
     `favicon_id` INTEGER NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `site_seo` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(500) NULL,
+    `keywords` TEXT NULL,
+    `og_title` VARCHAR(255) NULL,
+    `og_type` VARCHAR(100) NULL,
+    `og_description` VARCHAR(500) NULL,
+    `canonical_url` VARCHAR(255) NULL,
+    `meta` JSON NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -716,11 +737,12 @@ CREATE TABLE `site_metadata` (
 CREATE TABLE `google_scripts` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
-    `gtype` ENUM('ANALYTICS', 'TAG_MANAGER', 'ADSENSE', 'OTHER') NOT NULL,
+    `gtype` ENUM('ANALYTICS', 'TAG_MANAGER', 'ADSENSE') NOT NULL,
     `script` LONGTEXT NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `google_scripts_gtype_key`(`gtype`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
