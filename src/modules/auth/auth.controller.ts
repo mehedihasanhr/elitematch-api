@@ -55,7 +55,10 @@ export class AuthController {
    * @param data - LoginDto
    */
   @Post('login')
-  async login(@Body() data: LoginDto, @Res() res: Response) {
+  async login(
+    @Body() data: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.service.login(data);
     if (!result?.refreshToken) {
       throw new BadRequestException('Login failed, no refresh token provided');
