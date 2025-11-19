@@ -104,7 +104,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Res() res: Response) {
+  async logout(@Res({ passthrough: true }) res: Response) {
     await this.clearRefreshCookie(res);
     const resData = {
       message: 'Logged out successfully',
@@ -184,7 +184,7 @@ export class AuthController {
    */
   private async clearRefreshCookie(res: Response) {
     const secure = this.config.get<string>('NODE_ENV') === 'production';
-    const sameSiteEnv = process.env.COOKIE_SAMESITE || 'Lax';
+    const sameSiteEnv = this.config.get<string>('COOKIE_SAMESITE') ?? 'Lax';
     const sameSite = ['Lax', 'Strict', 'None'].includes(sameSiteEnv)
       ? sameSiteEnv
       : 'Lax';
