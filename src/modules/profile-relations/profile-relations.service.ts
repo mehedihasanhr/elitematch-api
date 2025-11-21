@@ -1,12 +1,12 @@
 import {
-  Injectable,
   BadRequestException,
+  Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
+import { paginate } from 'src/utils/paginate';
 import { CreateRelationDto } from './dto/create-relation.dto';
 import { UpdateRelationDto } from './dto/update-relation.dto';
-import { paginate } from 'src/utils/paginate';
 
 // Small typed shape for Prisma delegate operations we use here.
 type PrismaCrudDelegate = {
@@ -90,7 +90,7 @@ export class ProfileRelationsService {
       'culturalFit',
       'loveLanguage',
       'preferedDate',
-      'reasonsForUsing',
+      'reasonForUsing',
     ];
 
     const inputKey = canonical(name);
@@ -103,6 +103,7 @@ export class ProfileRelationsService {
   private ensureSupported(model: string) {
     // normalize incoming names and verify supported list
     const key = this.modelNameToPrismaKey(model);
+    console.log({ key, model });
     if (!key || !this.supportedModels.has(key)) {
       throw new BadRequestException(`Model ${model} not supported`);
     }

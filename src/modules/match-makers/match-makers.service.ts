@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMatchMakerDto } from './dto/create-match-maker.dto';
-import { UpdateMatchMakerDto } from './dto/update-match-maker.dto';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
 import { paginate } from 'src/utils/paginate';
+import { CreateMatchMakerDto } from './dto/create-match-maker.dto';
+import { UpdateMatchMakerDto } from './dto/update-match-maker.dto';
 
 @Injectable()
 export class MatchMakersService {
@@ -12,12 +12,13 @@ export class MatchMakersService {
     active: true,
     user: {
       select: {
+        id: true,
         firstName: true,
         lastName: true,
         avatarId: true,
         email: true,
+        avatar: true,
       },
-      include: { avatar: true },
     },
   };
 
@@ -56,6 +57,7 @@ export class MatchMakersService {
     const [matcher, total] = await this.prisma.$transaction([
       this.prisma.matchMaker.findMany({
         where: {},
+        select: this.basicSelect,
       }),
       this.prisma.matchMaker.count(),
     ]);
@@ -72,8 +74,8 @@ export class MatchMakersService {
    * Find a MatchMaker by ID.
    * @param id - ID of the MatchMaker to find.
    */
-  findOne(id: number) {
-    const matcher = this.prisma.matchMaker.findUnique({
+  async findOne(id: number) {
+    const matcher = await this.prisma.matchMaker.findUnique({
       where: { id },
       select: this.basicSelect,
     });
@@ -90,8 +92,8 @@ export class MatchMakersService {
    * @param id - ID of the MatchMaker to update.
    * @param updateMatchMakerDto - Data Transfer Object containing updated details.
    */
-  update(id: number, updateMatchMakerDto: UpdateMatchMakerDto) {
-    const matcher = this.prisma.matchMaker.update({
+  async update(id: number, updateMatchMakerDto: UpdateMatchMakerDto) {
+    const matcher = await this.prisma.matchMaker.update({
       where: { id },
       data: {
         experienceYears: updateMatchMakerDto.experienceYear || undefined,
@@ -110,8 +112,8 @@ export class MatchMakersService {
    * Remove a MatchMaker by ID.
    * @param id - ID of the MatchMaker to remove.
    */
-  remove(id: number) {
-    const matcher = this.prisma.matchMaker.delete({ where: { id } });
+  async remove(id: number) {
+    const matcher = await this.prisma.matchMaker.delete({ where: { id } });
     return {
       data: matcher,
       message: 'MatchMaker deleted successfully',
