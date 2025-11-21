@@ -112,7 +112,6 @@ export class MeetupService {
 
       return paginate(data, { total, page, limit });
     } catch (err) {
-      console.log(err);
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2023') {
           throw new BadRequestException('Invalid query parameters');

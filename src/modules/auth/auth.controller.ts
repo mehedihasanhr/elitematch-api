@@ -128,15 +128,12 @@ export class AuthController {
     const cookieName =
       this.config.get<string>('REFRESH_TOKEN_KEY') ?? 'refreshToken';
     const oldRefreshToken = req?.cookies ? req.cookies[cookieName] : undefined;
-    console.log({ oldRefreshToken });
 
     if (!oldRefreshToken) {
       throw new BadRequestException('Invalid Session, please log in again');
     }
 
     const r = await this.service.refreshAccessToken(oldRefreshToken);
-
-    console.log({ r });
 
     if (r.refreshToken) this.setRefreshCookie(res, r.refreshToken);
 

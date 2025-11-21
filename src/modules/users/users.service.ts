@@ -30,8 +30,6 @@ export class UsersService {
       }));
     }
 
-    console.log({ where });
-
     const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         skip,

@@ -103,7 +103,6 @@ export class ProfileRelationsService {
   private ensureSupported(model: string) {
     // normalize incoming names and verify supported list
     const key = this.modelNameToPrismaKey(model);
-    console.log({ key, model });
     if (!key || !this.supportedModels.has(key)) {
       throw new BadRequestException(`Model ${model} not supported`);
     }
