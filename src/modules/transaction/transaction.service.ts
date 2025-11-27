@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/cores/modules/prisma/prisma.service';
-import { SubscriptionQueryDto } from '../subscription/dto/subscription-query.dto';
 import { paginate } from 'src/utils/paginate';
+import { SubscriptionQueryDto } from '../subscription/dto/subscription-query.dto';
 
 @Injectable()
 export class TransactionService {
@@ -26,6 +26,7 @@ export class TransactionService {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
+        where,
         include: {
           subscription: {
             include: { plan: true },

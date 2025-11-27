@@ -1,12 +1,12 @@
-import { Body, Get, Injectable, Post, UseGuards } from '@nestjs/common';
-import { ChatsService } from './chats.service';
-import { CreateChatDto } from './dto/create-chat.dto';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/auth.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ChatsService } from './chats.service';
+import { CreateChatDto } from './dto/create-chat.dto';
 
 @ApiTags('chats')
-@Injectable()
+@Controller('chats')
 export class ChatsController {
   constructor(private readonly chatService: ChatsService) {}
 
@@ -24,5 +24,13 @@ export class ChatsController {
   @UseGuards(JwtAuthGuard)
   async findAll(@Auth('id') authId?: number) {
     return this.chatService.findAll(authId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get chat by id' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string, @Auth('id') authId?: number) {
+    return this.chatService.findOne(id, authId);
   }
 }

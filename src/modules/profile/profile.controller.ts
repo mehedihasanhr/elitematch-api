@@ -92,8 +92,10 @@ export class ProfileController {
     return this.service.getUnlockedProfiles(userId);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get profile by id' })
+  @Get('/by/user_id/:id')
+  @ApiOperation({ summary: 'Get profile by user id' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiParam({
     name: 'id',
     type: Number,
@@ -107,8 +109,29 @@ export class ProfileController {
     status: 404,
     description: 'Profile not found',
   })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  findByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.service.findByUserId(id);
+  }
+
+  @Get('/details/:id')
+  @ApiOperation({ summary: 'Get profile by id' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Profile ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile not found',
+  })
+  findOne(@Param('id', ParseIntPipe) id: number, @Auth('id') userId: number) {
+    return this.service.findOne(id, userId);
   }
 
   @Put(':id')

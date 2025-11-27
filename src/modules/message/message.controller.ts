@@ -1,18 +1,18 @@
 import {
   Body,
   Controller,
-  Post,
-  UseGuards,
   Get,
   Param,
-  Query,
+  Post,
   Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { MessageService } from './message.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/auth.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CreateMessageDto } from './dto/create-message.dto';
+import { MessageService } from './message.service';
 
 @Controller('message')
 @ApiTags('messages')
@@ -36,16 +36,17 @@ export class MessageController {
   @UseGuards(JwtAuthGuard)
   async findByChat(
     @Param('chatId') chatId: string,
-    @Query('page') page = '1',
-    @Query('limit') limit = '50',
+    // @Query('page') page = '1',
+    @Query('limit') limit = '500',
+    @Query('cursor') cursor?: number,
     @Auth('id') authId?: number,
   ) {
-    const p = Number(page) || 1;
+    // const p = Number(page) || 1;
     const l = Math.min(200, Math.max(1, Number(limit) || 50));
-    return this.messageService.findByChat(chatId, authId, p, l);
+    return this.messageService.findByChat(chatId, authId, l, cursor);
   }
 
-  @Put('/chat/:chatId/read')
+  @Put('/read/:chatId')
   @ApiOperation({
     summary: "Mark a chat's messages as read by the authenticated user",
   })
@@ -56,5 +57,18 @@ export class MessageController {
     @Auth('id') authId?: number,
   ) {
     return this.messageService.markChatAsSeen(chatId, authId);
+  }
+
+  @Put('/delivered/:chatId')
+  @ApiOperation({
+    summary: "Mark a chat's messages as read by the authenticated user",
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async markChatAsDelivered(
+    @Param('chatId') chatId: string,
+    @Auth('id') authId?: number,
+  ) {
+    return this.messageService.markChatAsDelivered(chatId, authId);
   }
 }

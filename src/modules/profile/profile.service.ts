@@ -249,12 +249,56 @@ export class ProfileService {
    * @returns The profile record if found.
    * @throws NotFoundException when no profile matches the given id.
    */
-  async findOne(id: number) {
+  async findOne(id: number, viewerId: number) {
     const item = await this.prisma.profile.findUnique({
       where: { id },
       include: this.baseInclude,
     });
-    if (!item) throw new NotFoundException('Profile not found');
+
+    if (!item) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    // Prevent self-chat (optional, but recommended)
+    if (viewerId === item.user.id) {
+      return {
+        ...item,
+        existingChat: null,
+      };
+    }
+
+    // Correctly find chat that includes BOTH users
+    const existingChat = await this.prisma.chat.findFirst({
+      where: {
+        AND: [
+          { users: { some: { id: viewerId } } },
+          { users: { some: { id: item.user.id } } },
+        ],
+        users: {
+          // Ensure exactly 2 users (optional: only if you want strict 1-on-1)
+          // Remove this if you allow group chats that include both
+          // none: { id: { notIn: [viewerId, item.user.id] } }, // no extra users
+        },
+      },
+      select: { id: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return {
+      ...item,
+      existingChat: existingChat ?? null,
+    };
+  }
+
+  async findByUserId(id: number) {
+    const item = await this.prisma.profile.findUnique({
+      where: { userId: id },
+      include: this.baseInclude,
+    });
+
+    if (!item) {
+      throw new NotFoundException('Profile not found');
+    }
+
     return item;
   }
 
@@ -417,6 +461,7 @@ export class ProfileService {
    * @param userId - User identifier of the user performing the unlock.
    */
   async unlockProfile(id: number, userId: number) {
+    console.log({ id, userId });
     // check user have active subscription
     const activeSubscription = await this.prisma.subscription.findFirst({
       where: {
@@ -474,6 +519,7 @@ export class ProfileService {
    * @param userId - User identifier of the user
    */
   async getUnlockedProfiles(userId: number) {
+    console.log({ userId });
     const profiles = await this.prisma.unlockedProfile.findMany({
       where: { userId },
       include: {
