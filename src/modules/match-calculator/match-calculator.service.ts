@@ -5,7 +5,7 @@ import { CreateMatchCalculatorDto } from './dto/create-match-calculator.dto';
 
 @Injectable()
 export class MatchCalculatorService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(
     createMatchCalculatorDto: CreateMatchCalculatorDto,
@@ -50,6 +50,10 @@ export class MatchCalculatorService {
         where: { id: { not: authId }, matchMaker: null },
       }),
     ]);
+
+    if (!items?.length) {
+      return paginate(items, { total, page, limit });
+    }
 
     const withMatchScores = await Promise.all(
       items.map(async (user) => {
