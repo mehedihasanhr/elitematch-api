@@ -86,6 +86,9 @@ export class AuthService {
         email,
         firstName: data.firstName,
         lastName: data.lastName,
+        profile: {
+          create: {},
+        },
       },
       select: { id: true },
     });

@@ -5,7 +5,7 @@ import { CreateMatchCalculatorDto } from './dto/create-match-calculator.dto';
 
 @Injectable()
 export class MatchCalculatorService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(
     createMatchCalculatorDto: CreateMatchCalculatorDto,
@@ -263,7 +263,30 @@ export class MatchCalculatorService {
     ]);
 
     if (!profileA || !profileB) {
-      throw new NotFoundException('One or both profiles not found');
+      return {
+        score: 0,
+        breakdown: {},
+        profileA: profileA
+          ? {
+              userId: profileA.userId,
+              id: profileA.id,
+              avatars: profileA.avatars,
+              firstName: profileA.user?.firstName,
+              lastName: profileA.user?.lastName,
+              email: profileA.user?.email,
+            }
+          : null,
+        profileB: profileB
+          ? {
+              userId: profileB.userId,
+              id: profileB.id,
+              avatars: profileB.avatars,
+              firstName: profileB.user?.firstName,
+              lastName: profileB.user?.lastName,
+              email: profileB.user?.email,
+            }
+          : null,
+      };
     }
 
     // helpers
