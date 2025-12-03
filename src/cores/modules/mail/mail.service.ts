@@ -26,7 +26,6 @@ export class MailService {
   ): string {
     const templatePath = path.join(
       process.cwd(),
-      'src',
       'templates',
       `${templateName}.hbs`,
     );

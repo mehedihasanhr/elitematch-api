@@ -1,0 +1,66 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:14007:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: "root"
+      PMA_PASSWORD: ${DATABASE_PASSWORD}
+      UPLOAD_LIMIT: 64M
+      MAX_EXECUTION_TIME: 600
+      MEMORY_LIMIT: 512M
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: .
+    container_name: api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "14000:14000"
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env
+    command: npm run start:prod
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+  uploads:
+
+networks:
+  app-network:
+    driver: bridge
