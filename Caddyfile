@@ -1,0 +1,50 @@
+elitmatchafricaapi.dotprogrammers.com {
+     # ----------------- Load Balancer ----------------- #
+    reverse_proxy localhost:14000 {
+        lb_policy round_robin          # equal distribution
+        health_uri /health             # backend health-check
+        fail_duration 10s
+        max_fails 3
+
+        # Headers for proper WebSocket and general proxying
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # No need for explicit http transport block, Caddy handles it automatically
+    }
+
+    # WebSocket specific handling (if using Socket.IO)
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    
+    handle @websockets {
+        reverse_proxy localhost:14000 {
+            # Special handling for WebSocket connections
+            header_up Connection {>Connection}
+            header_up Upgrade {>Upgrade}
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+        }
+    }
+
+    # Performance & Compression
+    encode gzip zstd
+
+    # Security headers
+    header {
+        # Remove problematic headers that might interfere with WebSockets
+        -Server
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+    }
+}
