@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   mysql:
     image: mysql:8.0
@@ -26,29 +28,22 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "127.0.0.1:14007:80"
+      - "127.0.0.1:14007:80" # local only
     environment:
       PMA_HOST: mysql
-      PMA_USER: "root"
+      PMA_USER: root
       PMA_PASSWORD: ${DATABASE_PASSWORD}
-      UPLOAD_LIMIT: 64M
-      MAX_EXECUTION_TIME: 600
-      MEMORY_LIMIT: 512M
     networks:
       - app-network
 
   api:
     build:
       context: .
-    container_name: api
     restart: unless-stopped
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
     volumes:
       - ./uploads:/app/uploads
-    ports:
-      - "14000:14000"
     environment:
       NODE_ENV: production
     env_file:
@@ -56,10 +51,38 @@ services:
     command: npm run start:prod
     networks:
       - app-network
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    labels:
+      caddy: "${PROD_SERVER_URL}"
+      caddy.reverse_proxy: "{{upstreams 14000}}" # auto load balance
+      caddy.tls: "true"
+      caddy.encode: "gzip zstd"
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ACME_AGREE=true
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app-network
+    depends_on:
+      - api
 
 volumes:
   mysql-data:
   uploads:
+  caddy_data:
+  caddy_config:
 
 networks:
   app-network:
